@@ -1,4 +1,7 @@
-//@author Liu Yukang
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #pragma once
 #include <functional>
 #include "context.h"
@@ -20,36 +23,34 @@ namespace netco
 	class Coroutine
 	{
 	public:
-		Coroutine(Processor*, size_t stackSize, std::function<void()>&&);
-		Coroutine(Processor*, size_t stackSize, std::function<void()>&);
+		Coroutine(Processor *, size_t stackSize, std::function<void()> &&);
+		Coroutine(Processor *, size_t stackSize, std::function<void()> &);
 		~Coroutine();
 
 		DISALLOW_COPY_MOVE_AND_ASSIGN(Coroutine);
 
-		//»Ö¸´ÔËĞĞµ±Ç°Ğ­³Ì
+		// æ¢å¤è¿è¡Œå½“å‰åç¨‹
 		void resume();
 
-		//ÔİÍ£ÔËĞĞµ±Ç°Ğ­³Ì
+		// æš‚åœè¿è¡Œå½“å‰åç¨‹
 		void yield();
 
-		Processor* getMyProcessor(){return pMyProcessor_;}
+		Processor *getMyProcessor() { return pMyProcessor_; }
 
-		//ÔËĞĞ¸ÃĞ­³ÌµÄº¯Êı
+		// è¿è¡Œè¯¥åç¨‹çš„å‡½æ•°
 		inline void startFunc() { coFunc_(); };
 
-		//»ñÈ¡¸ÃĞ­³ÌµÄÉÏÏÂÎÄ
-		inline Context* getCtx() { return &ctx_; }
+		// è·å–è¯¥åç¨‹çš„ä¸Šä¸‹æ–‡
+		inline Context *getCtx() { return &ctx_; }
 
 	private:
-
 		std::function<void()> coFunc_;
 
-		Processor* pMyProcessor_;
+		Processor *pMyProcessor_;
 
 		int status_;
 
 		Context ctx_;
-
 	};
 
 }

@@ -1,4 +1,7 @@
-//@author Liu Yukang
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #pragma once
 #include <stdint.h>
 #include <time.h>
@@ -8,20 +11,20 @@ struct timespec;
 namespace netco
 {
 
-	//Ò»ÄêÖĞÃ¿¸öÔÂµÄÌìÊı£¬·ÇÈòÄê
-	const char days[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+	//ä¸€å¹´ä¸­æ¯ä¸ªæœˆçš„å¤©æ•°ï¼Œéé—°å¹´
+	const char days[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-	//Ê±¼äÀà£¬µ¥Î»£ººÁÃëms
+	//æ—¶é—´ç±»ï¼Œå•ä½ï¼šæ¯«ç§’ms
 	class Time
 	{
 	public:
 		Time(int64_t msSinceEpoch) : _timeVal(msSinceEpoch) {}
 
-		Time(const Time& time) { _timeVal = time._timeVal; }
+		Time(const Time &time) { _timeVal = time._timeVal; }
 
-		Time(const Time&& time) { _timeVal = time._timeVal; }
+		Time(const Time &&time) { _timeVal = time._timeVal; }
 
-		Time& operator=(const Time& time)
+		Time &operator=(const Time &time)
 		{
 			_timeVal = time._timeVal;
 			return *this;
@@ -29,16 +32,16 @@ namespace netco
 
 		~Time() {}
 
-		//1970Äê1ÔÂ1ÈÕµ½ÏÖÔÚµÄºÁÃëÊı
+		// 1970å¹´1æœˆ1æ—¥åˆ°ç°åœ¨çš„æ¯«ç§’æ•°
 		static Time now();
 
-		//1970Äê1ÔÂ1ÈÕµ½ÏÖÔÚµÄÃëÊı
+		// 1970å¹´1æœˆ1æ—¥åˆ°ç°åœ¨çš„ç§’æ•°
 		static time_t nowSec();
 
-		//¸ù¾İ¾àÀë1970-01-01 00:00:00µÄÃëÊıºÍÓëÃëÊıËùÊôÊ±ÇøµÄÊ±²î¼ÆËãµ±Ç°Ê±ÇøµÄÊ±¼ä
-		static void toLocalTime(time_t second, long timezone, struct tm* tm_time);
+		//æ ¹æ®è·ç¦»1970-01-01 00:00:00çš„ç§’æ•°å’Œä¸ç§’æ•°æ‰€å±æ—¶åŒºçš„æ—¶å·®è®¡ç®—å½“å‰æ—¶åŒºçš„æ—¶é—´
+		static void toLocalTime(time_t second, long timezone, struct tm *tm_time);
 
-		//µ½ÏÖÔÚµÄÊ±¼ä
+		//åˆ°ç°åœ¨çš„æ—¶é—´
 		struct timespec timeIntervalFromNow();
 
 		int64_t getTimeVal() { return _timeVal; }
@@ -46,31 +49,31 @@ namespace netco
 	private:
 		int64_t _timeVal;
 
-		//´Ö²ÚÊ±¼ä£¬Ã¿´Îµ÷ÓÃnow»òUpdataRoughTime»á¸üĞÂ¸ÃÖµ£¬²»ĞèÒª¾«È·Ê±¼äµÄ³¡Ëù¿ÉÒÔµ÷ÓÃGetRoughTime»ñÈ¡¸ÃÊ±¼ä¡£µ¥Î»ÎªÃës
-		//static volatile time_t _roughTime;
+		//ç²—ç³™æ—¶é—´ï¼Œæ¯æ¬¡è°ƒç”¨nowæˆ–UpdataRoughTimeä¼šæ›´æ–°è¯¥å€¼ï¼Œä¸éœ€è¦ç²¾ç¡®æ—¶é—´çš„åœºæ‰€å¯ä»¥è°ƒç”¨GetRoughTimeè·å–è¯¥æ—¶é—´ã€‚å•ä½ä¸ºç§’s
+		// static volatile time_t _roughTime;
 	};
 
-	inline bool operator < (Time lhs, Time rhs)
+	inline bool operator<(Time lhs, Time rhs)
 	{
 		return lhs.getTimeVal() < rhs.getTimeVal();
 	}
 
-	inline bool operator <= (Time lhs, Time rhs)
+	inline bool operator<=(Time lhs, Time rhs)
 	{
 		return lhs.getTimeVal() <= rhs.getTimeVal();
 	}
 
-	inline bool operator > (Time lhs, Time rhs)
+	inline bool operator>(Time lhs, Time rhs)
 	{
 		return lhs.getTimeVal() > rhs.getTimeVal();
 	}
 
-	inline bool operator >= (Time lhs, Time rhs)
+	inline bool operator>=(Time lhs, Time rhs)
 	{
 		return lhs.getTimeVal() >= rhs.getTimeVal();
 	}
 
-	inline bool operator == (Time lhs, Time rhs)
+	inline bool operator==(Time lhs, Time rhs)
 	{
 		return lhs.getTimeVal() == rhs.getTimeVal();
 	}

@@ -1,4 +1,7 @@
-//@Author Liu Yukang 
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #pragma once
 
 #include "utils.h"
@@ -12,13 +15,15 @@
 
 struct tcp_info;
 
-namespace netco {
-
-	//SocketÀà£¬´´½¨µÄSocket¶ÔÏóÄ¬ÈÏ¶¼ÊÇ·Ç×èÈûµÄ
-	//Ö°Ôğ£º
-	//1¡¢Ìá¹©fd²Ù×÷µÄÏà¹ØAPI
-	//2¡¢¹ÜÀífdµÄÉúÃüÖÜÆÚ
-	//ÆäÖĞÓĞÒıÓÃ¼ÆÊı£¬ÈôÄ³Ò»fdÃ»ÈËÓÃÁË¾Í»áclose
+namespace netco
+{
+	/*
+		Socketç±»ï¼Œåˆ›å»ºçš„Socketå¯¹è±¡é»˜è®¤éƒ½æ˜¯éé˜»å¡çš„
+		èŒè´£ï¼š
+			1ã€æä¾›fdæ“ä½œçš„ç›¸å…³API
+			2ã€ç®¡ç†fdçš„ç”Ÿå‘½å‘¨æœŸ
+		å…¶ä¸­æœ‰å¼•ç”¨è®¡æ•°ï¼Œè‹¥æŸä¸€fdæ²¡äººç”¨äº†å°±ä¼šclose
+	*/
 	class Socket
 	{
 	public:
@@ -33,10 +38,11 @@ namespace netco {
 
 		Socket()
 			: _sockfd(::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP)),
-			_pRef(new int(1)), _port(-1), _ip("")
-		{ }
+			  _pRef(new int(1)), _port(-1), _ip("")
+		{
+		}
 
-		Socket(const Socket& otherSock) : _sockfd(otherSock._sockfd)
+		Socket(const Socket &otherSock) : _sockfd(otherSock._sockfd)
 		{
 			*(otherSock._pRef) += 1;
 			_pRef = otherSock._pRef;
@@ -44,7 +50,7 @@ namespace netco {
 			_port = otherSock._port;
 		}
 
-		Socket(Socket&& otherSock) : _sockfd(otherSock._sockfd)
+		Socket(Socket &&otherSock) : _sockfd(otherSock._sockfd)
 		{
 			*(otherSock._pRef) += 1;
 			_pRef = otherSock._pRef;
@@ -52,86 +58,86 @@ namespace netco {
 			_port = otherSock._port;
 		}
 
-		Socket& operator=(const Socket& otherSock) = delete;
+		Socket &operator=(const Socket &otherSock) = delete;
 
 		~Socket();
 
-		//·µ»Øµ±Ç°SocketµÄfd
+		// è¿”å›å½“å‰Socketçš„fd
 		int fd() const { return _sockfd; }
 
-		//·µ»Øµ±Ç°SocketÊÇ·ñ¿ÉÓÃ
+		// è¿”å›å½“å‰Socketæ˜¯å¦å¯ç”¨
 		bool isUseful() { return _sockfd >= 0; }
 
-		//°ó¶¨ipºÍportµ½µ±Ç°Socket
+		// ç»‘å®šipå’Œportåˆ°å½“å‰Socket
 		int bind(int port);
 
-		//¿ªÊ¼¼àÌıµ±Ç°Socket
+		// å¼€å§‹ç›‘å¬å½“å‰Socket
 		int listen();
 
-		//½ÓÊÕÒ»¸öÁ¬½Ó£¬·µ»ØÒ»¸öĞÂÁ¬½ÓµÄSocket
+		// æ¥æ”¶ä¸€ä¸ªè¿æ¥ï¼Œè¿”å›ä¸€ä¸ªæ–°è¿æ¥çš„Socket
 		Socket accept();
 
-		//´ÓsocketÖĞ¶ÁÊı¾İ
-		ssize_t read(void* buf, size_t count);
+		// ä»socketä¸­è¯»æ•°æ®
+		ssize_t read(void *buf, size_t count);
 
-		//ipÊ¾Àı£º"127.0.0.1"
-		void connect(const char* ip, int port);
+		// ipç¤ºä¾‹ï¼š"127.0.0.1"
+		void connect(const char *ip, int port);
 
-		//ÍùsocketÖĞĞ´Êı¾İ
-		ssize_t send(const void* buf, size_t count);
+		// å¾€socketä¸­å†™æ•°æ®
+		ssize_t send(const void *buf, size_t count);
 
-		//»ñÈ¡µ±Ç°Ì×½Ó×ÖµÄÄ¿±êip
+		// è·å–å½“å‰å¥—æ¥å­—çš„ç›®æ ‡ip
 		std::string ip() { return _ip; }
 
-		//»ñÈ¡µ±Ç°Ì×½Ó×ÖµÄÄ¿±êport
+		// è·å–å½“å‰å¥—æ¥å­—çš„ç›®æ ‡port
 		int port() { return _port; }
 
-		//»ñÈ¡Ì×½Ó×ÖµÄÑ¡Ïî,³É¹¦Ôò·µ»Øtrue£¬·´Ö®£¬·µ»Øfalse
-		bool getSocketOpt(struct tcp_info*) const;
+		// è·å–å¥—æ¥å­—çš„é€‰é¡¹,æˆåŠŸåˆ™è¿”å›trueï¼Œåä¹‹ï¼Œè¿”å›false
+		bool getSocketOpt(struct tcp_info *) const;
 
-		//»ñÈ¡Ì×½Ó×ÖµÄÑ¡ÏîµÄ×Ö·û´®,³É¹¦Ôò·µ»Øtrue£¬·´Ö®£¬·µ»Øfalse
-		bool getSocketOptString(char* buf, int len) const;
+		// è·å–å¥—æ¥å­—çš„é€‰é¡¹çš„å­—ç¬¦ä¸²,æˆåŠŸåˆ™è¿”å›trueï¼Œåä¹‹ï¼Œè¿”å›false
+		bool getSocketOptString(char *buf, int len) const;
 
-		//»ñÈ¡Ì×½Ó×ÖµÄÑ¡ÏîµÄ×Ö·û´®
+		// è·å–å¥—æ¥å­—çš„é€‰é¡¹çš„å­—ç¬¦ä¸²
 		std::string getSocketOptString() const;
 
-		//¹Ø±ÕÌ×½Ó×ÖµÄĞ´²Ù×÷
+		// å…³é—­å¥—æ¥å­—çš„å†™æ“ä½œ
 		int shutdownWrite();
 
-		//ÉèÖÃÊÇ·ñ¿ªÆôNagleËã·¨¼õÉÙĞèÒª´«ÊäµÄÊı¾İ°ü£¬Èô¿ªÆôÑÓÊ±¿ÉÄÜ»áÔö¼Ó
+		// è®¾ç½®æ˜¯å¦å¼€å¯Nagleç®—æ³•å‡å°‘éœ€è¦ä¼ è¾“çš„æ•°æ®åŒ…ï¼Œè‹¥å¼€å¯å»¶æ—¶å¯èƒ½ä¼šå¢åŠ 
 		int setTcpNoDelay(bool on);
 
-		//ÉèÖÃÊÇ·ñµØÖ·ÖØÓÃ
+		// è®¾ç½®æ˜¯å¦åœ°å€é‡ç”¨
 		int setReuseAddr(bool on);
 
-		//ÉèÖÃÊÇ·ñ¶Ë¿ÚÖØÓÃ
+		// è®¾ç½®æ˜¯å¦ç«¯å£é‡ç”¨
 		int setReusePort(bool on);
 
-		//ÉèÖÃÊÇ·ñÊ¹ÓÃĞÄÌø¼ì²â
+		// è®¾ç½®æ˜¯å¦ä½¿ç”¨å¿ƒè·³æ£€æµ‹
 		int setKeepAlive(bool on);
 
-		//ÉèÖÃsocketÎª·Ç×èÈûµÄ
+		// è®¾ç½®socketä¸ºéé˜»å¡çš„
 		int setNonBolckSocket();
 
-		//ÉèÖÃsocketÎª×èÈûµÄ
+		// è®¾ç½®socketä¸ºé˜»å¡çš„
 		int setBlockSocket();
 
-		//void SetNoSigPipe();
+		// void SetNoSigPipe();
 
 	private:
-		//½ÓÊÕÒ»¸öÁ¬½Ó£¬·µ»ØÒ»¸öĞÂÁ¬½ÓµÄSocket
+		// æ¥æ”¶ä¸€ä¸ªè¿æ¥ï¼Œè¿”å›ä¸€ä¸ªæ–°è¿æ¥çš„Socket
 		Socket accept_raw();
 
-		//fd
+		// fd
 		const int _sockfd;
 
-		//ÒıÓÃ¼ÆÊı
-		int* _pRef;
+		// å¼•ç”¨è®¡æ•°
+		int *_pRef;
 
-		//¶Ë¿ÚºÅ
+		// ç«¯å£å·
 		int _port;
 
-		//ip
+		// ip
 		std::string _ip;
 	};
 

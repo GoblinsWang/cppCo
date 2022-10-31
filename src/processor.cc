@@ -1,4 +1,7 @@
-//@author Liu Yukang
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #include "../include/processor.h"
 #include "../include/parameter.h"
 #include "../include/spinlock_guard.h"
@@ -36,7 +39,7 @@ Processor::~Processor()
 	}
 }
 
-void Processor::resume(Coroutine* pCo)
+void Processor::resume(Coroutine *pCo)
 {
 	if (nullptr == pCo)
 	{
@@ -47,7 +50,7 @@ void Processor::resume(Coroutine* pCo)
 	{
 		return;
 	}
-	
+
 	pCurCoroutine_ = pCo;
 	pCo->resume();
 }
@@ -61,11 +64,11 @@ void Processor::yield()
 void Processor::wait(Time time)
 {
 	pCurCoroutine_->yield();
-	timer_.runAfter(time,pCurCoroutine_);
+	timer_.runAfter(time, pCurCoroutine_);
 	mainCtx_.swapToMe(pCurCoroutine_->getCtx());
 }
 
-void Processor::goCo(Coroutine* pCo)
+void Processor::goCo(Coroutine *pCo)
 {
 	{
 		SpinlockGuard lock(newQueLock_);
@@ -74,10 +77,12 @@ void Processor::goCo(Coroutine* pCo)
 	wakeUpEpoller();
 }
 
-void Processor::goCoBatch(std::vector<Coroutine*>& cos){
+void Processor::goCoBatch(std::vector<Coroutine *> &cos)
+{
 	{
 		SpinlockGuard lock(newQueLock_);
-		for(auto pCo : cos){
+		for (auto pCo : cos)
+		{
 			newCoroutines_[!runningNewQue_].push(pCo);
 		}
 	}
@@ -86,19 +91,19 @@ void Processor::goCoBatch(std::vector<Coroutine*>& cos){
 
 bool Processor::loop()
 {
-	//≥ı ºªØEpoller
+	// ÂàùÂßãÂåñEpoller
 	if (!epoller_.init())
 	{
 		return false;
 	}
 
-	//≥ı ºªØTimer
+	// ÂàùÂßãÂåñTimer
 	if (!timer_.init(&epoller_))
 	{
 		return false;
 	}
 
-	//≥ı ºªØloop
+	// ÂàùÂßãÂåñloop
 	pLoop_ = new std::thread(
 		[this]
 		{
@@ -106,7 +111,7 @@ bool Processor::loop()
 			status_ = PRO_RUNNING;
 			while (PRO_RUNNING == status_)
 			{
-				//«Âø’À˘”–¡–±Ì
+				//Ê∏ÖÁ©∫ÊâÄÊúâÂàóË°®
 				if (actCoroutines_.size())
 				{
 					actCoroutines_.clear();
@@ -115,10 +120,10 @@ bool Processor::loop()
 				{
 					timerExpiredCo_.clear();
 				}
-				//ªÒ»°ªÓ‘æ ¬º˛
+				//Ëé∑ÂèñÊ¥ªË∑É‰∫ã‰ª∂
 				epoller_.getActEvServ(parameter::epollTimeOutMs, actCoroutines_);
 
-				//¥¶¿Ì≥¨ ±–≠≥Ã
+				//Â§ÑÁêÜË∂ÖÊó∂ÂçèÁ®ã
 				timer_.getExpiredCoroutines(timerExpiredCo_);
 				size_t timerCoCnt = timerExpiredCo_.size();
 				for (size_t i = 0; i < timerCoCnt; ++i)
@@ -126,10 +131,10 @@ bool Processor::loop()
 					resume(timerExpiredCo_[i]);
 				}
 
-				//÷¥–––¬¿¥µƒ–≠≥Ã
-				Coroutine* pNewCo = nullptr;
+				//ÊâßË°åÊñ∞Êù•ÁöÑÂçèÁ®ã
+				Coroutine *pNewCo = nullptr;
 				int runningQue = runningNewQue_;
-				
+
 				while (!newCoroutines_[runningQue].empty())
 				{
 					{
@@ -145,34 +150,33 @@ bool Processor::loop()
 					runningNewQue_ = !runningQue;
 				}
 
-				//÷¥––±ªªΩ–—µƒ–≠≥Ã
+				//ÊâßË°åË¢´Âî§ÈÜíÁöÑÂçèÁ®ã
 				size_t actCoCnt = actCoroutines_.size();
 				for (size_t i = 0; i < actCoCnt; ++i)
 				{
 					resume(actCoroutines_[i]);
 				}
 
-				//«Â≥˝“—æ≠÷¥––ÕÍ±œµƒ–≠≥Ã
+				//Ê∏ÖÈô§Â∑≤ÁªèÊâßË°åÂÆåÊØïÁöÑÂçèÁ®ã
 				for (auto deadCo : removedCo_)
 				{
 					coSet_.erase(deadCo);
-					//delete deadCo;
+					// delete deadCo;
 					{
 						SpinlockGuard lock(coPoolLock_);
 						coPool_.delete_obj(deadCo);
 					}
 				}
 				removedCo_.clear();
-				
 			}
 			status_ = PRO_STOPPED;
-		}
-		);
+		});
 	return true;
 }
 
-//µ»¥˝fd…œµƒev ¬º˛∑µªÿ
-void Processor::waitEvent(int fd, int ev){
+// Á≠âÂæÖfd‰∏äÁöÑev‰∫ã‰ª∂ËøîÂõû
+void Processor::waitEvent(int fd, int ev)
+{
 	epoller_.addEv(pCurCoroutine_, fd, ev);
 	yield();
 	epoller_.removeEv(pCurCoroutine_, fd, ev);
@@ -193,10 +197,10 @@ void Processor::wakeUpEpoller()
 	timer_.wakeUp();
 }
 
-void Processor::goNewCo(std::function<void()>&& coFunc, size_t stackSize)
+void Processor::goNewCo(std::function<void()> &&coFunc, size_t stackSize)
 {
-	//Coroutine* pCo = new Coroutine(this, stackSize, std::move(coFunc));
-	Coroutine* pCo = nullptr;
+	// Coroutine* pCo = new Coroutine(this, stackSize, std::move(coFunc));
+	Coroutine *pCo = nullptr;
 
 	{
 		SpinlockGuard lock(coPoolLock_);
@@ -206,16 +210,16 @@ void Processor::goNewCo(std::function<void()>&& coFunc, size_t stackSize)
 	goCo(pCo);
 }
 
-void Processor::goNewCo(std::function<void()>& coFunc, size_t stackSize)
+void Processor::goNewCo(std::function<void()> &coFunc, size_t stackSize)
 {
-	//Coroutine* pCo = new Coroutine(this, stackSize, coFunc);
-	Coroutine* pCo = nullptr;
+	// Coroutine* pCo = new Coroutine(this, stackSize, coFunc);
+	Coroutine *pCo = nullptr;
 
 	{
 		SpinlockGuard lock(coPoolLock_);
 		pCo = coPool_.new_obj(this, stackSize, coFunc);
 	}
-	
+
 	goCo(pCo);
 }
 

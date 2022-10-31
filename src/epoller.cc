@@ -1,4 +1,7 @@
-//@author Liu Yukang
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #include "../include/epoller.h"
 #include "../include/coroutine.h"
 #include "../include/parameter.h"
@@ -12,7 +15,8 @@ using namespace netco;
 
 Epoller::Epoller()
 	: epollFd_(-1), activeEpollEvents_(parameter::epollerListFirstSize)
-{ }
+{
+}
 
 Epoller::~Epoller()
 {
@@ -28,8 +32,8 @@ bool Epoller::init()
 	return isEpollFdUseful();
 }
 
-//ĞŞ¸ÄEpollerÖĞµÄÊÂ¼ş
-bool Epoller::modifyEv(Coroutine* pCo, int fd, int interesEv)
+// ä¿®æ”¹Epollerä¸­çš„äº‹ä»¶
+bool Epoller::modifyEv(Coroutine *pCo, int fd, int interesEv)
 {
 	if (!isEpollFdUseful())
 	{
@@ -46,8 +50,8 @@ bool Epoller::modifyEv(Coroutine* pCo, int fd, int interesEv)
 	return true;
 }
 
-//ÏòEpollerÖĞÌí¼ÓÊÂ¼ş
-bool Epoller::addEv(Coroutine* pCo, int fd, int interesEv)
+// å‘Epollerä¸­æ·»åŠ äº‹ä»¶
+bool Epoller::addEv(Coroutine *pCo, int fd, int interesEv)
 {
 	if (!isEpollFdUseful())
 	{
@@ -64,8 +68,8 @@ bool Epoller::addEv(Coroutine* pCo, int fd, int interesEv)
 	return true;
 }
 
-//´ÓEpollerÖĞÒÆ³ıÊÂ¼ş
-bool Epoller::removeEv(Coroutine* pCo, int fd, int interesEv)
+// ä»Epollerä¸­ç§»é™¤äº‹ä»¶
+bool Epoller::removeEv(Coroutine *pCo, int fd, int interesEv)
 {
 	if (!isEpollFdUseful())
 	{
@@ -82,7 +86,7 @@ bool Epoller::removeEv(Coroutine* pCo, int fd, int interesEv)
 	return true;
 }
 
-int Epoller::getActEvServ(int timeOutMs, std::vector<Coroutine*>& activeEvServs)
+int Epoller::getActEvServ(int timeOutMs, std::vector<Coroutine *> &activeEvServs)
 {
 	if (!isEpollFdUseful())
 	{
@@ -98,13 +102,13 @@ int Epoller::getActEvServ(int timeOutMs, std::vector<Coroutine*>& activeEvServs)
 		}
 		for (int i = 0; i < actEvNum; ++i)
 		{
-			//ÉèÖÃÊÂ¼şÀàĞÍ£¬·Å½ø»îÔ¾ÊÂ¼şÁĞ±íÖĞ
-			Coroutine* pCo = static_cast<Coroutine*>(activeEpollEvents_[i].data.ptr);
+			// è®¾ç½®äº‹ä»¶ç±»å‹ï¼Œæ”¾è¿›æ´»è·ƒäº‹ä»¶åˆ—è¡¨ä¸­
+			Coroutine *pCo = static_cast<Coroutine *>(activeEpollEvents_[i].data.ptr);
 			activeEvServs.push_back(pCo);
 		}
 		if (actEvNum == static_cast<int>(activeEpollEvents_.size()))
 		{
-			//Èô´ÓepollÖĞ»ñÈ¡ÊÂ¼şµÄÊı×éÂúÁË£¬ËµÃ÷Õâ¸öÊı×éµÄ´óĞ¡¿ÉÄÜ²»¹»£¬À©Õ¹Ò»±¶
+			// è‹¥ä»epollä¸­è·å–äº‹ä»¶çš„æ•°ç»„æ»¡äº†ï¼Œè¯´æ˜è¿™ä¸ªæ•°ç»„çš„å¤§å°å¯èƒ½ä¸å¤Ÿï¼Œæ‰©å±•ä¸€å€
 			activeEpollEvents_.resize(activeEpollEvents_.size() * 2);
 		}
 	}

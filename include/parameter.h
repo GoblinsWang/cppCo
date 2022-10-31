@@ -1,4 +1,7 @@
-//@author Liu Yukang
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #pragma once
 #include <stddef.h>
 
@@ -6,20 +9,20 @@ namespace netco
 {
 	namespace parameter
 	{
-		//Ğ­³ÌÕ»´óĞ¡
+		// åç¨‹æ ˆå¤§å°
 		const static size_t coroutineStackSize = 32 * 1024;
 
-		//»ñÈ¡»îÔ¾µÄepoll_eventµÄÊı×éµÄ³õÊ¼³¤¶È
+		// è·å–æ´»è·ƒçš„epoll_eventçš„æ•°ç»„çš„åˆå§‹é•¿åº¦
 		static constexpr int epollerListFirstSize = 16;
 
-		//epoll_waitµÄ×èÈûÊ±³¤
+		// epoll_waitçš„é˜»å¡æ—¶é•¿
 		static constexpr int epollTimeOutMs = 10000;
 
-		//¼àÌı¶ÓÁĞµÄ³¤¶È
+		// ç›‘å¬é˜Ÿåˆ—çš„é•¿åº¦
 		constexpr static unsigned backLog = 4096;
 
-		//ÄÚ´æ³ØÃ»ÓĞ¿ÕÏĞÄÚ´æ¿éÊ±ÉêÇëmemPoolMallocObjCnt¸ö¶ÔÏó´óĞ¡µÄÄÚ´æ¿é
+		// å†…å­˜æ± æ²¡æœ‰ç©ºé—²å†…å­˜å—æ—¶ç”³è¯·memPoolMallocObjCntä¸ªå¯¹è±¡å¤§å°çš„å†…å­˜å—
 		static constexpr size_t memPoolMallocObjCnt = 40;
 	}
-	
+
 }

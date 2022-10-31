@@ -1,4 +1,7 @@
-//@author Liu Yukang
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #include <iostream>
 #include <sys/sysinfo.h>
 
@@ -9,26 +12,29 @@
 
 using namespace netco;
 
-//netco http response with one acceptor test 
-//Ö»ÓĞÒ»¸öacceptorµÄ·şÎñ
+// netco http response with one acceptor test
+// åªæœ‰ä¸€ä¸ªacceptorçš„æœåŠ¡
 void single_acceptor_server_test()
 {
 	netco::co_go(
-		[]{
+		[]
+		{
 			netco::Socket listener;
 			if (listener.isUseful())
 			{
 				listener.setTcpNoDelay(true);
 				listener.setReuseAddr(true);
 				listener.setReusePort(true);
-				if (listener.bind(8099) < 0)
+				if (listener.bind(8888) < 0)
+
 				{
 					return;
 				}
 				listener.listen();
 			}
-			while (1){
-				netco::Socket* conn = new netco::Socket(listener.accept());
+			while (1)
+			{
+				netco::Socket *conn = new netco::Socket(listener.accept());
 				conn->setTcpNoDelay(true);
 				netco::co_go(
 					[conn]
@@ -37,28 +43,28 @@ void single_acceptor_server_test()
 						buf.resize(2048);
 						while (1)
 						{
-							auto readNum = conn->read((void*)&(buf[0]), buf.size());
+							auto readNum = conn->read((void *)&(buf[0]), buf.size());
 							std::string ok = "HTTP/1.0 200 OK\r\nServer: netco/0.1.0\r\nContent-Type: text/html\r\n\r\n";
-							if(readNum < 0){
+							if (readNum < 0)
+							{
 								break;
 							}
 							conn->send(ok.c_str(), ok.size());
-							conn->send((void*)&(buf[0]), readNum);
-							if(readNum < (int)buf.size()){
+							conn->send((void *)&(buf[0]), readNum);
+							if (readNum < (int)buf.size())
+							{
 								break;
 							}
 						}
-						netco::co_sleep(100);//ĞèÒªµÈÒ»ÏÂ£¬·ñÔò»¹Ã»·¢ËÍÍê±Ï¾Í¹Ø±ÕÁË
+						netco::co_sleep(100); //éœ€è¦ç­‰ä¸€ä¸‹ï¼Œå¦åˆ™è¿˜æ²¡å‘é€å®Œæ¯•å°±å…³é—­äº†
 						delete conn;
-					}
-					);
+					});
 			}
-		}
-	);
+		});
 }
 
-//netco http response with multi acceptor test 
-//Ã¿ÌõÏß³ÌÒ»¸öacceptorµÄ·şÎñ
+// netco http response with multi acceptor test
+//æ¯æ¡çº¿ç¨‹ä¸€ä¸ªacceptorçš„æœåŠ¡
 void multi_acceptor_server_test()
 {
 	auto tCnt = ::get_nprocs_conf();
@@ -73,7 +79,7 @@ void multi_acceptor_server_test()
 					listener.setTcpNoDelay(true);
 					listener.setReuseAddr(true);
 					listener.setReusePort(true);
-					if (listener.bind(8099) < 0)
+					if (listener.bind(8888) < 0)
 					{
 						return;
 					}
@@ -81,91 +87,93 @@ void multi_acceptor_server_test()
 				}
 				while (1)
 				{
-					netco::Socket* conn = new netco::Socket(listener.accept());
+					netco::Socket *conn = new netco::Socket(listener.accept());
 					conn->setTcpNoDelay(true);
 					netco::co_go(
 						[conn]
 						{
 							std::string hello("HTTP/1.0 200 OK\r\nServer: netco/0.1.0\r\nContent-Length: 72\r\nContent-Type: text/html\r\n\r\n<HTML><TITLE>hello</TITLE>\r\n<BODY><P>hello word!\r\n</BODY></HTML>\r\n");
-							//std::string hello("<HTML><TITLE>hello</TITLE>\r\n<BODY><P>hello word!\r\n</BODY></HTML>\r\n");
+							// std::string hello("<HTML><TITLE>hello</TITLE>\r\n<BODY><P>hello word!\r\n</BODY></HTML>\r\n");
 							char buf[1024];
-							if (conn->read((void*)buf, 1024) > 0)
+							if (conn->read((void *)buf, 1024) > 0)
 							{
 								conn->send(hello.c_str(), hello.size());
-								netco::co_sleep(50);//ĞèÒªµÈÒ»ÏÂ£¬·ñÔò»¹Ã»·¢ËÍÍê±Ï¾Í¹Ø±ÕÁË
+								netco::co_sleep(50); //éœ€è¦ç­‰ä¸€ä¸‹ï¼Œå¦åˆ™è¿˜æ²¡å‘é€å®Œæ¯•å°±å…³é—­äº†
 							}
 							delete conn;
-						}
-						);
+						});
 				}
-			}
-			,parameter::coroutineStackSize, i);
+			},
+			parameter::coroutineStackSize, i);
 	}
-	
 }
 
-//×÷Îª¿Í»§¶ËµÄ²âÊÔ£¬¿ÉÅäºÏÉÏÊöserver²âÊÔ
-void client_test(){
+//ä½œä¸ºå®¢æˆ·ç«¯çš„æµ‹è¯•ï¼Œå¯é…åˆä¸Šè¿°serveræµ‹è¯•
+void client_test()
+{
 	netco::co_go(
-				[]
-				{
-					char buf[1024];
-					while(1){
-						netco::co_sleep(2000);
-						netco::Socket s;
-						s.connect("127.0.0.1", 8099);
-						s.send("ping", 4);
-						s.read(buf, 1024);
-						std::cout << std::string(buf) << std::endl;
-					}
-				}
-				);
+		[]
+		{
+			char buf[1024];
+			while (1)
+			{
+				netco::co_sleep(2000);
+				netco::Socket s;
+				s.connect("127.0.0.1", 8099);
+				s.send("ping", 4);
+				s.read(buf, 1024);
+				std::cout << std::string(buf) << std::endl;
+			}
+		});
 }
 
-//¶ÁĞ´Ëø²âÊÔ
-void mutex_test(netco::RWMutex& mu){
-	for(int i = 0; i < 10; ++i)
-	if(i < 5){
-		netco::co_go(
-		[&mu, i]{
-			mu.rlock();
-			std::cout << i << " : start reading" << std::endl;
-			netco::co_sleep(100);
-			std::cout << i << " : finish reading" << std::endl;
-			mu.runlock();
-			mu.wlock();
-			std::cout << i << " : start writing" << std::endl;
-			netco::co_sleep(100);
-			std::cout << i << " : finish writing" << std::endl;
-			mu.wunlock();
+//è¯»å†™é”æµ‹è¯•
+void mutex_test(netco::RWMutex &mu)
+{
+	for (int i = 0; i < 10; ++i)
+		if (i < 5)
+		{
+			netco::co_go(
+				[&mu, i]
+				{
+					mu.rlock();
+					std::cout << i << " : start reading" << std::endl;
+					netco::co_sleep(100);
+					std::cout << i << " : finish reading" << std::endl;
+					mu.runlock();
+					mu.wlock();
+					std::cout << i << " : start writing" << std::endl;
+					netco::co_sleep(100);
+					std::cout << i << " : finish writing" << std::endl;
+					mu.wunlock();
+				});
 		}
-		);
-	}else{
-		netco::co_go(
-		[&mu, i]{
-			mu.wlock();
-			std::cout << i << " : start writing" << std::endl;
-			netco::co_sleep(100);
-			std::cout << i << " : finish writing" << std::endl;
-			mu.wunlock();
-			mu.rlock();
-			std::cout << i << " : start reading" << std::endl;
-			netco::co_sleep(100);
-			std::cout << i << " : finish reading" << std::endl;
-			mu.runlock();
+		else
+		{
+			netco::co_go(
+				[&mu, i]
+				{
+					mu.wlock();
+					std::cout << i << " : start writing" << std::endl;
+					netco::co_sleep(100);
+					std::cout << i << " : finish writing" << std::endl;
+					mu.wunlock();
+					mu.rlock();
+					std::cout << i << " : start reading" << std::endl;
+					netco::co_sleep(100);
+					std::cout << i << " : finish reading" << std::endl;
+					mu.runlock();
+				});
 		}
-	);
-	}
-	
 }
 
 int main()
 {
-	//netco::RWMutex mu;
-	//mutex_test(mu);
+	// netco::RWMutex mu;
+	// mutex_test(mu);
 	single_acceptor_server_test();
-	//multi_acceptor_server_test();
-	//client_test();
+	// multi_acceptor_server_test();
+	// client_test();
 	netco::sche_join();
 	std::cout << "end" << std::endl;
 	return 0;

@@ -1,7 +1,10 @@
-//@author Liu Yukang
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #include "../include/netco_api.h"
 
-void netco::co_go(std::function<void()>&& func, size_t stackSize, int tid)
+void netco::co_go(std::function<void()> &&func, size_t stackSize, int tid)
 {
 	if (tid < 0)
 	{
@@ -14,7 +17,7 @@ void netco::co_go(std::function<void()>&& func, size_t stackSize, int tid)
 	}
 }
 
-void netco::co_go(std::function<void()>& func, size_t stackSize, int tid)
+void netco::co_go(std::function<void()> &func, size_t stackSize, int tid)
 {
 	if (tid < 0)
 	{

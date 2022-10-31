@@ -1,16 +1,20 @@
-//@author Liu Yukang
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #include "../include/scheduler.h"
 
 #include <sys/sysinfo.h>
 
 using namespace netco;
 
-Scheduler* Scheduler::pScher_ = nullptr;
+Scheduler *Scheduler::pScher_ = nullptr;
 std::mutex Scheduler::scherMtx_;
 
 Scheduler::Scheduler()
-	:proSelector_(processors_)
-{ }
+	: proSelector_(processors_)
+{
+}
 
 Scheduler::~Scheduler()
 {
@@ -35,7 +39,7 @@ bool Scheduler::startScheduler(int threadCnt)
 	return true;
 }
 
-Scheduler* Scheduler::getScheduler()
+Scheduler *Scheduler::getScheduler()
 {
 	if (nullptr == pScher_)
 	{
@@ -49,12 +53,12 @@ Scheduler* Scheduler::getScheduler()
 	return pScher_;
 }
 
-void Scheduler::createNewCo(std::function<void()>&& func, size_t stackSize)
+void Scheduler::createNewCo(std::function<void()> &&func, size_t stackSize)
 {
 	proSelector_.next()->goNewCo(std::move(func), stackSize);
 }
 
-void Scheduler::createNewCo(std::function<void()>& func, size_t stackSize)
+void Scheduler::createNewCo(std::function<void()> &func, size_t stackSize)
 {
 	proSelector_.next()->goNewCo(func, stackSize);
 }
@@ -67,7 +71,7 @@ void Scheduler::join()
 	}
 }
 
-Processor* Scheduler::getProcessor(int id)
+Processor *Scheduler::getProcessor(int id)
 {
 	return processors_[id];
 }

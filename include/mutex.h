@@ -1,4 +1,7 @@
-//@author Liu Yukang
+/***
+    @author: Wangzhiming
+    @date: 2021-10-29
+***/
 #pragma once
 #include "coroutine.h"
 #include "spinlock.h"
@@ -6,33 +9,34 @@
 #include <atomic>
 #include <queue>
 
-namespace netco{
+namespace netco
+{
 
     enum muStatus
-	{
-		MU_FREE = 0,
-		MU_READING,
-		MU_WRITING
-	};
+    {
+        MU_FREE = 0,
+        MU_READING,
+        MU_WRITING
+    };
 
-    //读写锁
-    class RWMutex{
+    // 读写锁
+    class RWMutex
+    {
     public:
         RWMutex()
-            : state_(MU_FREE), readingNum_(0)
-        {};
+            : state_(MU_FREE), readingNum_(0){};
         ~RWMutex(){};
 
         DISALLOW_COPY_MOVE_AND_ASSIGN(RWMutex);
 
-        //读锁
+        // 读锁
         void rlock();
-        //解读锁
+        // 解读锁
         void runlock();
 
-        //写锁
+        // 写锁
         void wlock();
-        //解写锁
+        // 解写锁
         void wunlock();
 
     private:
@@ -44,8 +48,7 @@ namespace netco{
 
         Spinlock lock_;
 
-        std::queue<Coroutine*> waitingCo_;
-
+        std::queue<Coroutine *> waitingCo_;
     };
 
 }

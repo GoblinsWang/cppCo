@@ -1,4 +1,7 @@
-//@Author Liu Yukang 
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #include "../include/timer.h"
 #include "../include/coroutine.h"
 #include "../include/epoller.h"
@@ -12,9 +15,10 @@ using namespace netco;
 
 Timer::Timer()
 	: timeFd_(-1)
-{}
+{
+}
 
-Timer::~Timer() 
+Timer::~Timer()
 {
 	if (isTimeFdUseful())
 	{
@@ -22,7 +26,7 @@ Timer::~Timer()
 	}
 }
 
-bool Timer::init(Epoller* pEpoller)
+bool Timer::init(Epoller *pEpoller)
 {
 	timeFd_ = ::timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
 	if (isTimeFdUseful())
@@ -32,7 +36,7 @@ bool Timer::init(Epoller* pEpoller)
 	return false;
 }
 
-void Timer::getExpiredCoroutines(std::vector<Coroutine*>& expiredCoroutines)
+void Timer::getExpiredCoroutines(std::vector<Coroutine *> &expiredCoroutines)
 {
 	Time nowTime = Time::now();
 	while (!timerCoHeap_.empty() && timerCoHeap_.top().first <= nowTime)
@@ -57,16 +61,16 @@ void Timer::getExpiredCoroutines(std::vector<Coroutine*>& expiredCoroutines)
 	}
 }
 
-void Timer::runAt(Time time, Coroutine* pCo)
+void Timer::runAt(Time time, Coroutine *pCo)
 {
-	timerCoHeap_.push(std::move(std::pair<Time, Coroutine*>(time, pCo)));
+	timerCoHeap_.push(std::move(std::pair<Time, Coroutine *>(time, pCo)));
 	if (timerCoHeap_.top().first == time)
-	{//ĞÂ¼ÓÈëµÄÈÎÎñÊÇ×î½ô¼±µÄÈÎÎñÔòĞèÒª¸ü¸ÄtimefdËùÉèÖÃµÄÊ±¼ä
+	{ //æ–°åŠ å…¥çš„ä»»åŠ¡æ˜¯æœ€ç´§æ€¥çš„ä»»åŠ¡åˆ™éœ€è¦æ›´æ”¹timefdæ‰€è®¾ç½®çš„æ—¶é—´
 		resetTimeOfTimefd(time);
 	}
 }
 
-//¸øtimefdÖØĞÂÉèÖÃÊ±¼ä£¬timeÊÇ¾ø¶ÔÊ±¼ä
+//ç»™timefdé‡æ–°è®¾ç½®æ—¶é—´ï¼Œtimeæ˜¯ç»å¯¹æ—¶é—´
 bool Timer::resetTimeOfTimefd(Time time)
 {
 	struct itimerspec newValue;
@@ -78,7 +82,7 @@ bool Timer::resetTimeOfTimefd(Time time)
 	return ret < 0 ? false : true;
 }
 
-void Timer::runAfter(Time time, Coroutine* pCo)
+void Timer::runAfter(Time time, Coroutine *pCo)
 {
 	Time runTime(Time::now().getTimeVal() + time.getTimeVal());
 	runAt(runTime, pCo);

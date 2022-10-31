@@ -1,4 +1,7 @@
-//@author Liu Yukang
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #pragma once
 #include <queue>
 #include <set>
@@ -11,7 +14,7 @@
 #include "epoller.h"
 #include "timer.h"
 
-extern __thread int threadIdx;
+extern __thread int threadIdx; // æ¯ä¸ªçº¿ç¨‹éƒ½ä¼šæœ‰ä¸€ä»½
 
 namespace netco
 {
@@ -36,16 +39,16 @@ namespace netco
 
 		DISALLOW_COPY_MOVE_AND_ASSIGN(Processor);
 
-		//ÔËĞĞÒ»¸öĞÂĞ­³Ì£¬¸ÃĞ­³ÌµÄº¯ÊıÊÇfunc
-		void goNewCo(std::function<void()>&& func, size_t stackSize);
-		void goNewCo(std::function<void()>& func, size_t stackSize);
+		// è¿è¡Œä¸€ä¸ªæ–°åç¨‹ï¼Œè¯¥åç¨‹çš„å‡½æ•°æ˜¯func
+		void goNewCo(std::function<void()> &&func, size_t stackSize);
+		void goNewCo(std::function<void()> &func, size_t stackSize);
 
 		void yield();
 
-		//µ±Ç°Ğ­³ÌµÈ´ıtimeºÁÃë
+		// å½“å‰åç¨‹ç­‰å¾…timeæ¯«ç§’
 		void wait(Time time);
 
-		//Çå³ıµ±Ç°ÕıÔÚÔËĞĞµÄĞ­³Ì
+		// æ¸…é™¤å½“å‰æ­£åœ¨è¿è¡Œçš„åç¨‹
 		void killCurCo();
 
 		bool loop();
@@ -54,67 +57,66 @@ namespace netco
 
 		void join();
 
-		//µÈ´ıfdÉÏµÄevÊÂ¼ş·µ»Ø
+		// ç­‰å¾…fdä¸Šçš„eväº‹ä»¶è¿”å›
 		void waitEvent(int fd, int ev);
 
-		//»ñÈ¡µ±Ç°ÕıÔÚÔËĞĞµÄĞ­³Ì
-		inline Coroutine* getCurRunningCo() { return pCurCoroutine_; };
+		// è·å–å½“å‰æ­£åœ¨è¿è¡Œçš„åç¨‹
+		inline Coroutine *getCurRunningCo() { return pCurCoroutine_; };
 
-		inline Context* getMainCtx() { return &mainCtx_; }
+		inline Context *getMainCtx() { return &mainCtx_; }
 
 		inline size_t getCoCnt() { return coSet_.size(); }
 
-		void goCo(Coroutine* co);
+		void goCo(Coroutine *co);
 
-		void goCoBatch(std::vector<Coroutine*>& cos);
+		void goCoBatch(std::vector<Coroutine *> &cos);
 
 	private:
-
-		//»Ö¸´ÔËĞĞÖ¸¶¨Ğ­³Ì
-		void resume(Coroutine*);
+		// æ¢å¤è¿è¡ŒæŒ‡å®šåç¨‹
+		void resume(Coroutine *);
 
 		inline void wakeUpEpoller();
 
-		//¸Ã´¦ÀíÆ÷µÄÏß³ÌºÅ
+		// è¯¥å¤„ç†å™¨çš„çº¿ç¨‹å·
 		int tid_;
 
 		int status_;
 
-		std::thread* pLoop_;
+		std::thread *pLoop_;
 
-		//ĞÂÈÎÎñ¶ÓÁĞ£¬Ê¹ÓÃË«»º´æ¶ÓÁĞ
-		std::queue<Coroutine*> newCoroutines_[2];
+		// æ–°ä»»åŠ¡é˜Ÿåˆ—ï¼Œä½¿ç”¨åŒç¼“å­˜é˜Ÿåˆ—
+		std::queue<Coroutine *> newCoroutines_[2];
 
-		//ĞÂÈÎÎñË«»º´æ¶ÓÁĞÖĞÕıÔÚÔËĞĞµÄ¶ÓÁĞºÅ£¬ÁíÒ»ÌõÓÃÓÚÌí¼ÓÈÎÎñ
+		// æ–°ä»»åŠ¡åŒç¼“å­˜é˜Ÿåˆ—ä¸­æ­£åœ¨è¿è¡Œçš„é˜Ÿåˆ—å·ï¼Œå¦ä¸€æ¡ç”¨äºæ·»åŠ ä»»åŠ¡
 		volatile int runningNewQue_;
 
 		Spinlock newQueLock_;
 
 		Spinlock coPoolLock_;
 
-		//std::mutex newCoQueMtx_;
+		// std::mutex newCoQueMtx_;
 
-		//EventEpoller·¢ÏÖµÄ»îÔ¾ÊÂ¼şËù·ÅµÄÁĞ±í
-		std::vector<Coroutine*> actCoroutines_;
+		// EventEpollerå‘ç°çš„æ´»è·ƒäº‹ä»¶æ‰€æ”¾çš„åˆ—è¡¨
+		std::vector<Coroutine *> actCoroutines_;
 
-		std::set<Coroutine*> coSet_;
+		std::set<Coroutine *> coSet_;
 
-		//¶¨Ê±Æ÷ÈÎÎñÁĞ±í
-		std::vector<Coroutine*> timerExpiredCo_;
+		// å®šæ—¶å™¨ä»»åŠ¡åˆ—è¡¨
+		std::vector<Coroutine *> timerExpiredCo_;
 
-		//±»ÒÆ³ıµÄĞ­³ÌÁĞ±í£¬ÒªÒÆ³ıÄ³Ò»¸öÊÂ¼ş»áÏÈ·ÅÔÚ¸ÃÁĞ±íÖĞ£¬Ò»´ÎÑ­»·½áÊø²Å»áÕæÕıdelete
-		std::vector<Coroutine*> removedCo_;
+		// è¢«ç§»é™¤çš„åç¨‹åˆ—è¡¨ï¼Œè¦ç§»é™¤æŸä¸€ä¸ªäº‹ä»¶ä¼šå…ˆæ”¾åœ¨è¯¥åˆ—è¡¨ä¸­ï¼Œä¸€æ¬¡å¾ªç¯ç»“æŸæ‰ä¼šçœŸæ­£delete
+		std::vector<Coroutine *> removedCo_;
 
 		Epoller epoller_;
 
+		// ç”¨æ¥å”¤é†’epoller
 		Timer timer_;
 
 		ObjPool<Coroutine> coPool_;
 
-		Coroutine* pCurCoroutine_;
+		Coroutine *pCurCoroutine_;
 
 		Context mainCtx_;
 	};
 
 }
-

@@ -1,11 +1,14 @@
-//@Author Liu Yukang 
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #include "../include/socket.h"
 #include "../include/scheduler.h"
 
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
-#include <stdio.h>  // snprintf
+#include <stdio.h> // snprintf
 #include <fcntl.h>
 #include <string.h>
 #include <sys/epoll.h>
@@ -22,35 +25,35 @@ Socket::~Socket()
 	}
 }
 
-bool Socket::getSocketOpt(struct tcp_info* tcpi) const
+bool Socket::getSocketOpt(struct tcp_info *tcpi) const
 {
 	socklen_t len = sizeof(*tcpi);
 	memset(tcpi, 0, sizeof(*tcpi));
 	return ::getsockopt(_sockfd, SOL_TCP, TCP_INFO, tcpi, &len) == 0;
 }
 
-bool Socket::getSocketOptString(char* buf, int len) const
+bool Socket::getSocketOptString(char *buf, int len) const
 {
 	struct tcp_info tcpi;
 	bool ok = getSocketOpt(&tcpi);
 	if (ok)
 	{
 		snprintf(buf, len, "unrecovered=%u "
-			"rto=%u ato=%u snd_mss=%u rcv_mss=%u "
-			"lost=%u retrans=%u rtt=%u rttvar=%u "
-			"sshthresh=%u cwnd=%u total_retrans=%u",
-			tcpi.tcpi_retransmits,  // Number of unrecovered [RTO] timeouts
-			tcpi.tcpi_rto,          // Retransmit timeout in usec
-			tcpi.tcpi_ato,          // Predicted tick of soft clock in usec
-			tcpi.tcpi_snd_mss,
-			tcpi.tcpi_rcv_mss,
-			tcpi.tcpi_lost,         // Lost packets
-			tcpi.tcpi_retrans,      // Retransmitted packets out
-			tcpi.tcpi_rtt,          // Smoothed round trip time in usec
-			tcpi.tcpi_rttvar,       // Medium deviation
-			tcpi.tcpi_snd_ssthresh,
-			tcpi.tcpi_snd_cwnd,
-			tcpi.tcpi_total_retrans);  // Total retransmits for entire connection
+						   "rto=%u ato=%u snd_mss=%u rcv_mss=%u "
+						   "lost=%u retrans=%u rtt=%u rttvar=%u "
+						   "sshthresh=%u cwnd=%u total_retrans=%u",
+				 tcpi.tcpi_retransmits, // Number of unrecovered [RTO] timeouts
+				 tcpi.tcpi_rto,			// Retransmit timeout in usec
+				 tcpi.tcpi_ato,			// Predicted tick of soft clock in usec
+				 tcpi.tcpi_snd_mss,
+				 tcpi.tcpi_rcv_mss,
+				 tcpi.tcpi_lost,	// Lost packets
+				 tcpi.tcpi_retrans, // Retransmitted packets out
+				 tcpi.tcpi_rtt,		// Smoothed round trip time in usec
+				 tcpi.tcpi_rttvar,	// Medium deviation
+				 tcpi.tcpi_snd_ssthresh,
+				 tcpi.tcpi_snd_cwnd,
+				 tcpi.tcpi_total_retrans); // Total retransmits for entire connection
 	}
 	return ok;
 }
@@ -63,7 +66,6 @@ std::string Socket::getSocketOptString() const
 	return std::string(buf);
 }
 
-
 int Socket::bind(int port)
 {
 	_port = port;
@@ -72,7 +74,7 @@ int Socket::bind(int port)
 	serv.sin_family = AF_INET;
 	serv.sin_port = htons(port);
 	serv.sin_addr.s_addr = htonl(INADDR_ANY);
-	int ret = ::bind(_sockfd, (struct sockaddr*) & serv, sizeof(serv));
+	int ret = ::bind(_sockfd, (struct sockaddr *)&serv, sizeof(serv));
 	return ret;
 }
 
@@ -87,74 +89,83 @@ Socket Socket::accept_raw()
 	int connfd = -1;
 	struct sockaddr_in client;
 	socklen_t len = sizeof(client);
-	connfd = ::accept(_sockfd, (struct sockaddr*) & client, &len);
+	connfd = ::accept(_sockfd, (struct sockaddr *)&client, &len);
 	if (connfd < 0)
 	{
 		return Socket(connfd);
 	}
 
-	//accept³É¹¦±£´æÓÃ»§ip
-	struct sockaddr_in* sock = (struct sockaddr_in*) & client;
-	int port = ntohs(sock->sin_port);          //linuxÉÏ´òÓ¡·½Ê½
+	// acceptæˆåŠŸä¿å­˜ç”¨æˆ·ip
+	struct sockaddr_in *sock = (struct sockaddr_in *)&client;
+	int port = ntohs(sock->sin_port); // linuxä¸Šæ‰“å°æ–¹å¼
 	struct in_addr in = sock->sin_addr;
-	char ip[INET_ADDRSTRLEN];   //INET_ADDRSTRLENÕâ¸öºêÏµÍ³Ä¬ÈÏ¶¨Òå 16
-	//³É¹¦µÄ»°´ËÊ±IPµØÖ·±£´æÔÚstr×Ö·û´®ÖĞ¡£
+	char ip[INET_ADDRSTRLEN]; // INET_ADDRSTRLENè¿™ä¸ªå®ç³»ç»Ÿé»˜è®¤å®šä¹‰ 16
+	//æˆåŠŸçš„è¯æ­¤æ—¶IPåœ°å€ä¿å­˜åœ¨strå­—ç¬¦ä¸²ä¸­ã€‚
 	inet_ntop(AF_INET, &in, ip, sizeof(ip));
 
 	return Socket(connfd, std::string(ip), port);
 }
 
-Socket Socket::accept(){
+Socket Socket::accept()
+{
 	auto ret(accept_raw());
-	if(ret.isUseful()){
+	if (ret.isUseful())
+	{
 		return ret;
 	}
 	netco::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(_sockfd, EPOLLIN | EPOLLPRI | EPOLLRDHUP | EPOLLHUP);
 	auto con(accept_raw());
-	if(con.isUseful()){
+	if (con.isUseful())
+	{
 		return con;
 	}
 	return accept();
 }
 
-//´ÓsocketÖĞ¶ÁÊı¾İ
-ssize_t Socket::read(void* buf, size_t count)
+//ä»socketä¸­è¯»æ•°æ®
+ssize_t Socket::read(void *buf, size_t count)
 {
 	auto ret = ::read(_sockfd, buf, count);
-	if (ret >= 0){
+	if (ret >= 0)
+	{
 		return ret;
 	}
-	if(ret == -1 && errno == EINTR){
+	if (ret == -1 && errno == EINTR) // è¢«ä¸­æ–­ä¿¡å·ï¼ˆåªæœ‰é˜»å¡çŠ¶æ€æ‰ä¼šå‡ºç°ï¼‰
+	{
 		return read(buf, count);
 	}
 	netco::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(_sockfd, EPOLLIN | EPOLLPRI | EPOLLRDHUP | EPOLLHUP);
 	return ::read(_sockfd, buf, count);
 }
 
-void Socket::connect(const char* ip, int port){
+void Socket::connect(const char *ip, int port)
+{
 	struct sockaddr_in addr = {0};
-	addr.sin_family= AF_INET;
+	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
 	inet_pton(AF_INET, ip, &addr.sin_addr);
 	_ip = std::string(ip);
 	_port = port;
-	auto ret = ::connect(_sockfd, (struct sockaddr*)&addr, sizeof(sockaddr_in));
-	if(ret == 0){
+	auto ret = ::connect(_sockfd, (struct sockaddr *)&addr, sizeof(sockaddr_in));
+	if (ret == 0)
+	{
 		return;
 	}
-	if(ret == -1 && errno == EINTR){
+	if (ret == -1 && errno == EINTR)
+	{
 		return connect(ip, port);
 	}
 	netco::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(_sockfd, EPOLLOUT);
 	return connect(ip, port);
 }
 
-//ÍùsocketÖĞĞ´Êı¾İ
-ssize_t Socket::send(const void* buf, size_t count)
+//å¾€socketä¸­å†™æ•°æ®
+ssize_t Socket::send(const void *buf, size_t count)
 {
-	//ºöÂÔSIGPIPEĞÅºÅ
+	//å¿½ç•¥SIGPIPEä¿¡å·
 	size_t sendIdx = ::send(_sockfd, buf, count, MSG_NOSIGNAL);
-	if (sendIdx >= count){
+	if (sendIdx >= count)
+	{
 		return count;
 	}
 	netco::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(_sockfd, EPOLLOUT);
@@ -171,7 +182,7 @@ int Socket::setTcpNoDelay(bool on)
 {
 	int optval = on ? 1 : 0;
 	int ret = ::setsockopt(_sockfd, IPPROTO_TCP, TCP_NODELAY,
-		&optval, static_cast<socklen_t>(sizeof optval));
+						   &optval, static_cast<socklen_t>(sizeof optval));
 	return ret;
 }
 
@@ -179,7 +190,7 @@ int Socket::setReuseAddr(bool on)
 {
 	int optval = on ? 1 : 0;
 	int ret = ::setsockopt(_sockfd, SOL_SOCKET, SO_REUSEADDR,
-		&optval, static_cast<socklen_t>(sizeof optval));
+						   &optval, static_cast<socklen_t>(sizeof optval));
 	return ret;
 }
 
@@ -189,7 +200,7 @@ int Socket::setReusePort(bool on)
 #ifdef SO_REUSEPORT
 	int optval = on ? 1 : 0;
 	ret = ::setsockopt(_sockfd, SOL_SOCKET, SO_REUSEPORT,
-		&optval, static_cast<socklen_t>(sizeof optval));
+					   &optval, static_cast<socklen_t>(sizeof optval));
 #endif
 	return ret;
 }
@@ -198,22 +209,22 @@ int Socket::setKeepAlive(bool on)
 {
 	int optval = on ? 1 : 0;
 	int ret = ::setsockopt(_sockfd, SOL_SOCKET, SO_KEEPALIVE,
-		&optval, static_cast<socklen_t>(sizeof optval));
+						   &optval, static_cast<socklen_t>(sizeof optval));
 	return ret;
 }
 
-//ÉèÖÃsocketÎª·Ç×èÈûµÄ
+//è®¾ç½®socketä¸ºéé˜»å¡çš„
 int Socket::setNonBolckSocket()
 {
 	auto flags = fcntl(_sockfd, F_GETFL, 0);
-	int ret = fcntl(_sockfd, F_SETFL, flags | O_NONBLOCK);   //ÉèÖÃ³É·Ç×èÈûÄ£Ê½
+	int ret = fcntl(_sockfd, F_SETFL, flags | O_NONBLOCK); //è®¾ç½®æˆéé˜»å¡æ¨¡å¼
 	return ret;
 }
 
-//ÉèÖÃsocketÎª×èÈûµÄ
+//è®¾ç½®socketä¸ºé˜»å¡çš„
 int Socket::setBlockSocket()
 {
 	auto flags = fcntl(_sockfd, F_GETFL, 0);
-	int ret = fcntl(_sockfd, F_SETFL, flags & ~O_NONBLOCK);    //ÉèÖÃ³É×èÈûÄ£Ê½£»
+	int ret = fcntl(_sockfd, F_SETFL, flags & ~O_NONBLOCK); //è®¾ç½®æˆé˜»å¡æ¨¡å¼ï¼›
 	return ret;
 }

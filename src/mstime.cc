@@ -1,4 +1,7 @@
-//@Author Liu Yukang 
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #include "../include/mstime.h"
 #include <sys/time.h>
 
@@ -19,39 +22,39 @@ time_t Time::nowSec()
 	return tv.tv_sec;
 }
 
-void Time::toLocalTime(time_t second, long timezone, struct tm* tm_time)
+void Time::toLocalTime(time_t second, long timezone, struct tm *tm_time)
 {
 	uint32_t n32_Pass4year;
 	int32_t n32_hpery;
 
-	//¼ÆËãÊ±²î
+	//è®¡ç®—æ—¶å·®
 	second = second - timezone;
 
 	if (second < 0)
 	{
 		second = 0;
 	}
-	//È¡ÃëÊ±¼ä
+	//å–ç§’æ—¶é—´
 	tm_time->tm_sec = (int)(second % 60);
 	second /= 60;
-	//È¡·ÖÖÓÊ±¼ä
+	//å–åˆ†é’Ÿæ—¶é—´
 	tm_time->tm_min = (int)(second % 60);
 	second /= 60;
-	//È¡¹ıÈ¥¶àÉÙ¸öËÄÄê£¬Ã¿ËÄÄêÓĞ 1461*24 Ğ¡Ê±
+	//å–è¿‡å»å¤šå°‘ä¸ªå››å¹´ï¼Œæ¯å››å¹´æœ‰ 1461*24 å°æ—¶
 	n32_Pass4year = ((unsigned int)second / (1461L * 24L));
-	//¼ÆËãÄê·İ
+	//è®¡ç®—å¹´ä»½
 	tm_time->tm_year = (n32_Pass4year << 2) + 70;
-	//ËÄÄêÖĞÊ£ÏÂµÄĞ¡Ê±Êı
+	//å››å¹´ä¸­å‰©ä¸‹çš„å°æ—¶æ•°
 	second %= 1461L * 24L;
-	//Ğ£ÕıÈòÄêÓ°ÏìµÄÄê·İ£¬¼ÆËãÒ»ÄêÖĞÊ£ÏÂµÄĞ¡Ê±Êı
+	//æ ¡æ­£é—°å¹´å½±å“çš„å¹´ä»½ï¼Œè®¡ç®—ä¸€å¹´ä¸­å‰©ä¸‹çš„å°æ—¶æ•°
 	for (;;)
 	{
-		//Ò»ÄêµÄĞ¡Ê±Êı
+		//ä¸€å¹´çš„å°æ—¶æ•°
 		n32_hpery = 365 * 24;
-		//ÅĞ¶ÏÈòÄê
+		//åˆ¤æ–­é—°å¹´
 		if ((tm_time->tm_year & 3) == 0)
 		{
-			//ÊÇÈòÄê£¬Ò»ÄêÔò¶à24Ğ¡Ê±£¬¼´Ò»Ìì
+			//æ˜¯é—°å¹´ï¼Œä¸€å¹´åˆ™å¤š24å°æ—¶ï¼Œå³ä¸€å¤©
 			n32_hpery += 24;
 		}
 		if (second < n32_hpery)
@@ -61,13 +64,13 @@ void Time::toLocalTime(time_t second, long timezone, struct tm* tm_time)
 		tm_time->tm_year++;
 		second -= n32_hpery;
 	}
-	//Ğ¡Ê±Êı
+	//å°æ—¶æ•°
 	tm_time->tm_hour = (int)(second % 24);
-	//Ò»ÄêÖĞÊ£ÏÂµÄÌìÊı
+	//ä¸€å¹´ä¸­å‰©ä¸‹çš„å¤©æ•°
 	second /= 24;
-	//¼Ù¶¨ÎªÈòÄê
+	//å‡å®šä¸ºé—°å¹´
 	second++;
-	//Ğ£ÕıÈóÄêµÄÎó²î£¬¼ÆËãÔÂ·İ£¬ÈÕÆÚ
+	//æ ¡æ­£æ¶¦å¹´çš„è¯¯å·®ï¼Œè®¡ç®—æœˆä»½ï¼Œæ—¥æœŸ
 	if ((tm_time->tm_year & 3) == 0)
 	{
 		if (second > 60)
@@ -84,7 +87,7 @@ void Time::toLocalTime(time_t second, long timezone, struct tm* tm_time)
 			}
 		}
 	}
-	//¼ÆËãÔÂÈÕ
+	//è®¡ç®—æœˆæ—¥
 	for (tm_time->tm_mon = 0; days[tm_time->tm_mon] < second; tm_time->tm_mon++)
 	{
 		second -= days[tm_time->tm_mon];
@@ -100,11 +103,11 @@ struct timespec Time::timeIntervalFromNow()
 	struct timespec ts;
 	int64_t microseconds = _timeVal - Time::now().getTimeVal();
 	if (microseconds < 1)
-	{//ÈôÊ±¼ä¼ä¸ôÒÑ¾­Ğ¡ÓÚTimeµÄ¾«¶ÈmsÊ±£¬¼´µ±×÷1us
+	{ //è‹¥æ—¶é—´é—´éš”å·²ç»å°äºTimeçš„ç²¾åº¦msæ—¶ï¼Œå³å½“ä½œ1us
 		ts.tv_sec = 0;
 		ts.tv_nsec = 1000;
 	}
-	else 
+	else
 	{
 		ts.tv_sec = static_cast<time_t>(
 			microseconds / 1000);

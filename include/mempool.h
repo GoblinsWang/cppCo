@@ -1,4 +1,7 @@
-//@Author Liu Yukang 
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #pragma once
 #include "parameter.h"
 #include "utils.h"
@@ -9,18 +12,18 @@ namespace netco
 	{
 		union
 		{
-			MemBlockNode* next;
+			MemBlockNode *next;
 			char data;
 		};
 	};
 
-	//√ø¥Œø…“‘¥”ƒ⁄¥Ê≥ÿ÷–ªÒ»°objSize¥Û–°µƒƒ⁄¥ÊøÈ
-	template<size_t objSize>
+	// ÊØèÊ¨°ÂèØ‰ª•‰ªéÂÜÖÂ≠òÊ±†‰∏≠Ëé∑ÂèñobjSizeÂ§ßÂ∞èÁöÑÂÜÖÂ≠òÂùó
+	template <size_t objSize>
 	class MemPool
 	{
 	public:
 		MemPool()
-			:_freeListHead(nullptr), _mallocListHead(nullptr), _mallocTimes(0)
+			: _freeListHead(nullptr), _mallocListHead(nullptr), _mallocTimes(0)
 		{
 			if (objSize < sizeof(MemBlockNode))
 			{
@@ -36,49 +39,49 @@ namespace netco
 
 		DISALLOW_COPY_MOVE_AND_ASSIGN(MemPool);
 
-		void* AllocAMemBlock();
-		void FreeAMemBlock(void* block);
+		void *AllocAMemBlock();
+		void FreeAMemBlock(void *block);
 
 	private:
-		//ø’œ–¡¥±Ì
-		MemBlockNode* _freeListHead;
-		//mallocµƒ¥Ûƒ⁄¥ÊøÈ¡¥±Ì
-		MemBlockNode* _mallocListHead;
-		// µº mallocµƒ¥Œ ˝
+		// Á©∫Èó≤ÈìæË°®
+		MemBlockNode *_freeListHead;
+		// mallocÁöÑÂ§ßÂÜÖÂ≠òÂùóÈìæË°®
+		MemBlockNode *_mallocListHead;
+		// ÂÆûÈôÖmallocÁöÑÊ¨°Êï∞
 		size_t _mallocTimes;
-		//√ø∏ˆƒ⁄¥ÊøÈ¥Û–°
+		// ÊØè‰∏™ÂÜÖÂ≠òÂùóÂ§ßÂ∞è
 		size_t objSize_;
 	};
 
-	template<size_t objSize>
+	template <size_t objSize>
 	MemPool<objSize>::~MemPool()
 	{
 		while (_mallocListHead)
 		{
-			MemBlockNode* mallocNode = _mallocListHead;
+			MemBlockNode *mallocNode = _mallocListHead;
 			_mallocListHead = mallocNode->next;
-			free(static_cast<void*>(mallocNode));
+			free(static_cast<void *>(mallocNode));
 		}
 	}
 
-	template<size_t objSize>
-	void* MemPool<objSize>::AllocAMemBlock()
+	template <size_t objSize>
+	void *MemPool<objSize>::AllocAMemBlock()
 	{
-		void* ret;
+		void *ret;
 		if (nullptr == _freeListHead)
 		{
 			size_t mallocCnt = parameter::memPoolMallocObjCnt + _mallocTimes;
-			void* newMallocBlk = malloc(mallocCnt * objSize_ + sizeof(MemBlockNode));
-			MemBlockNode* mallocNode = static_cast<MemBlockNode*>(newMallocBlk);
+			void *newMallocBlk = malloc(mallocCnt * objSize_ + sizeof(MemBlockNode));
+			MemBlockNode *mallocNode = static_cast<MemBlockNode *>(newMallocBlk);
 			mallocNode->next = _mallocListHead;
 			_mallocListHead = mallocNode;
-			newMallocBlk = static_cast<char*>(newMallocBlk) + sizeof(MemBlockNode);
+			newMallocBlk = static_cast<char *>(newMallocBlk) + sizeof(MemBlockNode);
 			for (size_t i = 0; i < mallocCnt; ++i)
 			{
-				MemBlockNode* newNode = static_cast<MemBlockNode*>(newMallocBlk);
+				MemBlockNode *newNode = static_cast<MemBlockNode *>(newMallocBlk);
 				newNode->next = _freeListHead;
 				_freeListHead = newNode;
-				newMallocBlk = static_cast<char*>(newMallocBlk) + objSize_;
+				newMallocBlk = static_cast<char *>(newMallocBlk) + objSize_;
 			}
 			++_mallocTimes;
 		}
@@ -87,14 +90,14 @@ namespace netco
 		return ret;
 	}
 
-	template<size_t objSize>
-	void MemPool<objSize>::FreeAMemBlock(void* block)
+	template <size_t objSize>
+	void MemPool<objSize>::FreeAMemBlock(void *block)
 	{
 		if (nullptr == block)
 		{
 			return;
 		}
-		MemBlockNode* newNode = static_cast<MemBlockNode*>(block);
+		MemBlockNode *newNode = static_cast<MemBlockNode *>(block);
 		newNode->next = _freeListHead;
 		_freeListHead = newNode;
 	}

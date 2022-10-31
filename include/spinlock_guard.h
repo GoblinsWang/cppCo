@@ -1,15 +1,19 @@
-//@author Liu Yukang
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #pragma once
 #include "spinlock.h"
 #include "utils.h"
 
-namespace netco {
+namespace netco
+{
 
-	//配合std::atomic_int定义的二元信号量使用，为1表示资源可以使用，为0表示资源不可使用
+	//閰嶅悎std::atomic_int瀹氫箟鐨勪簩鍏冧俊鍙烽噺浣跨敤锛屼负1琛ㄧず璧勬簮鍙互浣跨敤锛屼负0琛ㄧず璧勬簮涓嶅彲浣跨敤
 	class SpinlockGuard
 	{
 	public:
-		SpinlockGuard(Spinlock& l)
+		SpinlockGuard(Spinlock &l)
 			: lock_(l)
 		{
 			lock_.lock();
@@ -23,8 +27,7 @@ namespace netco {
 		DISALLOW_COPY_MOVE_AND_ASSIGN(SpinlockGuard);
 
 	private:
-		Spinlock& lock_;
-
+		Spinlock &lock_;
 	};
 
 }

@@ -1,4 +1,7 @@
-//@Author Liu Yukang 
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #pragma once
 #include <vector>
 
@@ -8,31 +11,30 @@ namespace netco
 
 	enum scheduleStrategy
 	{
-		MIN_EVENT_FIRST = 0 , //×îÉÙÊÂ¼şÓÅÏÈ
-		ROUND_ROBIN			  //ÂÖÁ÷·Ö·¢
+		MIN_EVENT_FIRST = 0, // æœ€å°‘äº‹ä»¶ä¼˜å…ˆ
+		ROUND_ROBIN			 // è½®æµåˆ†å‘
 	};
 
-	//ÊÂ¼ş¹ÜÀíÆ÷Ñ¡ÔñÆ÷£¬¾ö¶¨ÏÂÒ»¸öÊÂ¼şÓ¦¸Ã·ÅÈëÄÄ¸öÊÂ¼ş¹ÜÀíÆ÷ÖĞ
+	// äº‹ä»¶ç®¡ç†å™¨é€‰æ‹©å™¨ï¼Œå†³å®šä¸‹ä¸€ä¸ªäº‹ä»¶åº”è¯¥æ”¾å…¥å“ªä¸ªäº‹ä»¶ç®¡ç†å™¨ä¸­
 	class ProcessorSelector
 	{
 	public:
-		ProcessorSelector(std::vector<Processor*>& processors, int strategy = MIN_EVENT_FIRST) :  curPro_(-1) , strategy_(strategy) , processors_(processors) {}
+		ProcessorSelector(std::vector<Processor *> &processors, int strategy = MIN_EVENT_FIRST) : curPro_(-1), strategy_(strategy), processors_(processors) {}
 		~ProcessorSelector() {}
 
-		//ÉèÖÃ·Ö·¢ÈÎÎñµÄ²ßÂÔ
-		//MIN_EVENT_FIRSTÔòÃ¿´ÎÌôÑ¡EventService×îÉÙµÄEventManager½ÓÊÕĞÂÁ¬½Ó
-		//ROUND_ROBINÔòÃ¿´ÎÂÖÁ÷ÌôÑ¡EventManager½ÓÊÕĞÂÁ¬½Ó
+		// è®¾ç½®åˆ†å‘ä»»åŠ¡çš„ç­–ç•¥
+		// MIN_EVENT_FIRSTåˆ™æ¯æ¬¡æŒ‘é€‰EventServiceæœ€å°‘çš„EventManageræ¥æ”¶æ–°è¿æ¥
+		// ROUND_ROBINåˆ™æ¯æ¬¡è½®æµæŒ‘é€‰EventManageræ¥æ”¶æ–°è¿æ¥
 		inline void setStrategy(int strategy) { strategy_ = strategy; };
 
-		Processor* next();
+		Processor *next();
 
 	private:
 		int curPro_;
 
 		int strategy_;
 
-		std::vector<Processor*>& processors_;
-
+		std::vector<Processor *> &processors_;
 	};
 
 }

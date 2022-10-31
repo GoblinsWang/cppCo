@@ -1,4 +1,7 @@
-//@Author Liu Yukang 
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #pragma once
 #include "mstime.h"
 #include "utils.h"
@@ -16,43 +19,43 @@ namespace netco
 	class Coroutine;
 	class Epoller;
 
-	//¶¨Ê±Æ÷
+	// å®šæ—¶å™¨
 	class Timer
 	{
 	public:
-		using TimerHeap = typename std::priority_queue<std::pair<Time, Coroutine*>, std::vector<std::pair<Time, Coroutine*>>, std::greater<std::pair<Time, Coroutine*>>>;
+		using TimerHeap = typename std::priority_queue<std::pair<Time, Coroutine *>, std::vector<std::pair<Time, Coroutine *>>, std::greater<std::pair<Time, Coroutine *>>>;
 
 		Timer();
 		~Timer();
 
-		bool init(Epoller*);
+		bool init(Epoller *);
 
 		DISALLOW_COPY_MOVE_AND_ASSIGN(Timer);
 
-		//»ñÈ¡ËùÓĞÒÑ¾­³¬Ê±µÄĞèÒªÖ´ĞĞµÄº¯Êı
-		void getExpiredCoroutines(std::vector<Coroutine*>& expiredCoroutines);
+		// è·å–æ‰€æœ‰å·²ç»è¶…æ—¶çš„éœ€è¦æ‰§è¡Œçš„å‡½æ•°
+		void getExpiredCoroutines(std::vector<Coroutine *> &expiredCoroutines);
 
-		//ÔÚtimeÊ±¿ÌĞèÒª»Ö¸´Ğ­³Ìco
-		void runAt(Time time, Coroutine* pCo);
+		// åœ¨timeæ—¶åˆ»éœ€è¦æ¢å¤åç¨‹co
+		void runAt(Time time, Coroutine *pCo);
 
-		//¾­¹ıtimeºÁÃë»Ö¸´Ğ­³Ìco
-		void runAfter(Time time, Coroutine* pCo);
+		// ç»è¿‡timeæ¯«ç§’æ¢å¤åç¨‹co
+		void runAfter(Time time, Coroutine *pCo);
 
 		void wakeUp();
 
 	private:
-		//¸øtimefdÖØĞÂÉèÖÃÊ±¼ä£¬timeÊÇ¾ø¶ÔÊ±¼ä
+		// ç»™timefdé‡æ–°è®¾ç½®æ—¶é—´ï¼Œtimeæ˜¯ç»å¯¹æ—¶é—´
 		bool resetTimeOfTimefd(Time time);
 
 		inline bool isTimeFdUseful() { return timeFd_ < 0 ? false : true; };
 
 		int timeFd_;
 
-		//ÓÃÓÚread timefdÉÏÊı¾İµÄ
+		// ç”¨äºread timefdä¸Šæ•°æ®çš„
 		char dummyBuf_[TIMER_DUMMYBUF_SIZE];
 
-		//¶¨Ê±Æ÷Ğ­³Ì¼¯ºÏ
-		//std::multimap<Time, Coroutine*> timerCoMap_;
+		// å®šæ—¶å™¨åç¨‹é›†åˆ
+		// std::multimap<Time, Coroutine*> timerCoMap_;
 		TimerHeap timerCoHeap_;
 	};
 

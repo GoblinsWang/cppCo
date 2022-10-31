@@ -1,29 +1,31 @@
-//@author Liu Yukang
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #pragma once
 #include "scheduler.h"
 #include "mstime.h"
 
-namespace netco 
+namespace netco
 {
-	////////////////////Ğ­³Ìµ÷ÓÃÏà¹Ø½Ó¿Ú///////////////////
+	////////////////////åç¨‹è°ƒç”¨ç›¸å…³æ¥å£///////////////////
+	/*
+		å¹¶å‘è¿è¡Œä¸€ä¸ªåç¨‹ï¼Œåç¨‹å°†è¿è¡Œfuncå‡½æ•°
+		å¯ä»¥æŒ‡å®šåç¨‹æ ˆå¤§å°stackSizeï¼Œé»˜è®¤ä¸º2k
+		tidï¼šåç¨‹è¦è¿è¡Œåœ¨å“ªä¸ªçº¿ç¨‹ä¸Š
+			-1ï¼š ä½¿ç”¨netcoè°ƒåº¦å™¨é€‰æ‹©åç¨‹è¿è¡Œåœ¨å“ªä¸ªçº¿ç¨‹
+			otherï¼šçº¿ç¨‹å·
+		netcoä¼šæ ¹æ®å¤„ç†å™¨ä¸ªæ•°åˆ›å»ºç­‰æ•°é‡çš„çº¿ç¨‹ç”¨äºè¿è¡Œåç¨‹ï¼Œ
+		è‹¥æœ‰4ä¸ªå¤„ç†å™¨ï¼Œåˆ™tidåªæœ‰0 ~ 3æ˜¯æœ‰æ•ˆçš„
+	*/
+	void co_go(std::function<void()> &func, size_t stackSize = parameter::coroutineStackSize, int tid = -1);
+	void co_go(std::function<void()> &&func, size_t stackSize = parameter::coroutineStackSize, int tid = -1);
 
-	//²¢·¢ÔËĞĞÒ»¸öĞ­³Ì£¬Ğ­³Ì½«ÔËĞĞfuncº¯Êı
-	//¿ÉÒÔÖ¸¶¨Ğ­³ÌÕ»´óĞ¡stackSize£¬Ä¬ÈÏÎª2k
-	//tid£ºĞ­³ÌÒªÔËĞĞÔÚÄÄ¸öÏß³ÌÉÏ
-	//		-1£º Ê¹ÓÃnetcoµ÷¶ÈÆ÷Ñ¡ÔñĞ­³ÌÔËĞĞÔÚÄÄ¸öÏß³Ì
-	//		other£ºÏß³ÌºÅ
-	//netco»á¸ù¾İ´¦ÀíÆ÷¸öÊı´´½¨µÈÊıÁ¿µÄÏß³ÌÓÃÓÚÔËĞĞĞ­³Ì£¬
-	//ÈôÓĞ4¸ö´¦ÀíÆ÷£¬ÔòtidÖ»ÓĞ0 ~ 3ÊÇÓĞĞ§µÄ 
-	void co_go(std::function<void()>& func, size_t stackSize = parameter::coroutineStackSize, int tid = -1);
-	void co_go(std::function<void()>&& func, size_t stackSize = parameter::coroutineStackSize, int tid = -1);
-
-	//µ±Ç°Ğ­³ÌµÈ´ıtºÁÃëºóÔÙ¼ÌĞøÖ´ĞĞ
+	// å½“å‰åç¨‹ç­‰å¾…tæ¯«ç§’åå†ç»§ç»­æ‰§è¡Œ
 	void co_sleep(Time t);
 
-	//µÈ´ıµ÷¶ÈÆ÷µÄ½áÊø
+	// ç­‰å¾…è°ƒåº¦å™¨çš„ç»“æŸ
 	void sche_join();
 
-	//////////////ÍøÂçÏà¹ØÏµÍ³µ÷ÓÃÊ¹ÓÃSocket.hÍ·ÖĞµÄ·â×°//////////
+	//////////////ç½‘ç»œç›¸å…³ç³»ç»Ÿè°ƒç”¨ä½¿ç”¨Socket.hå¤´ä¸­çš„å°è£…//////////
 }
-
-

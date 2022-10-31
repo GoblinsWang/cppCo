@@ -1,10 +1,13 @@
-//@author Liu Yukang
+/***
+	@author: Wangzhiming
+	@date: 2021-10-29
+***/
 #include "../include/processor_selector.h"
 #include "../include/processor.h"
 
 using namespace netco;
 
-Processor* ProcessorSelector::next()
+Processor *ProcessorSelector::next()
 {
 	int n = static_cast<int>(processors_.size());
 	if (!n)
@@ -16,7 +19,7 @@ Processor* ProcessorSelector::next()
 	switch (strategy_)
 	{
 	case MIN_EVENT_FIRST:
-		for (int i = 1; i < n ; ++i)
+		for (int i = 1; i < n; ++i)
 		{
 			size_t coCnt = processors_[i]->getCoCnt();
 			if (coCnt < minCoCnt)
