@@ -17,11 +17,11 @@ using namespace netco;
 
 Socket::~Socket()
 {
-	--(*_pRef);
-	if (!(*_pRef) && isUseful())
+	--(*pRef_);
+	if (!(*pRef_) && isUseful())
 	{
-		::close(_sockfd);
-		delete _pRef;
+		::close(sockfd_);
+		delete pRef_;
 	}
 }
 
@@ -29,7 +29,7 @@ bool Socket::getSocketOpt(struct tcp_info *tcpi) const
 {
 	socklen_t len = sizeof(*tcpi);
 	memset(tcpi, 0, sizeof(*tcpi));
-	return ::getsockopt(_sockfd, SOL_TCP, TCP_INFO, tcpi, &len) == 0;
+	return ::getsockopt(sockfd_, SOL_TCP, TCP_INFO, tcpi, &len) == 0;
 }
 
 bool Socket::getSocketOptString(char *buf, int len) const
@@ -68,19 +68,19 @@ std::string Socket::getSocketOptString() const
 
 int Socket::bind(int port)
 {
-	_port = port;
+	port_ = port;
 	struct sockaddr_in serv;
 	memset(&serv, 0, sizeof(struct sockaddr_in));
 	serv.sin_family = AF_INET;
 	serv.sin_port = htons(port);
 	serv.sin_addr.s_addr = htonl(INADDR_ANY);
-	int ret = ::bind(_sockfd, (struct sockaddr *)&serv, sizeof(serv));
+	int ret = ::bind(sockfd_, (struct sockaddr *)&serv, sizeof(serv));
 	return ret;
 }
 
 int Socket::listen()
 {
-	int ret = ::listen(_sockfd, parameter::backLog);
+	int ret = ::listen(sockfd_, parameter::backLog);
 	return ret;
 }
 
@@ -89,7 +89,7 @@ Socket Socket::accept_raw()
 	int connfd = -1;
 	struct sockaddr_in client;
 	socklen_t len = sizeof(client);
-	connfd = ::accept(_sockfd, (struct sockaddr *)&client, &len);
+	connfd = ::accept(sockfd_, (struct sockaddr *)&client, &len);
 	if (connfd < 0)
 	{
 		return Socket(connfd);
@@ -113,7 +113,7 @@ Socket Socket::accept()
 	{
 		return ret;
 	}
-	netco::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(_sockfd, EPOLLIN | EPOLLPRI | EPOLLRDHUP | EPOLLHUP);
+	netco::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(sockfd_, EPOLLIN | EPOLLPRI | EPOLLRDHUP | EPOLLHUP);
 	auto con(accept_raw());
 	if (con.isUseful())
 	{
@@ -125,7 +125,7 @@ Socket Socket::accept()
 //从socket中读数据
 ssize_t Socket::read(void *buf, size_t count)
 {
-	auto ret = ::read(_sockfd, buf, count);
+	auto ret = ::read(sockfd_, buf, count);
 	if (ret >= 0)
 	{
 		return ret;
@@ -134,8 +134,8 @@ ssize_t Socket::read(void *buf, size_t count)
 	{
 		return read(buf, count);
 	}
-	netco::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(_sockfd, EPOLLIN | EPOLLPRI | EPOLLRDHUP | EPOLLHUP);
-	return ::read(_sockfd, buf, count);
+	netco::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(sockfd_, EPOLLIN | EPOLLPRI | EPOLLRDHUP | EPOLLHUP);
+	return ::read(sockfd_, buf, count);
 }
 
 void Socket::connect(const char *ip, int port)
@@ -144,9 +144,9 @@ void Socket::connect(const char *ip, int port)
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
 	inet_pton(AF_INET, ip, &addr.sin_addr);
-	_ip = std::string(ip);
-	_port = port;
-	auto ret = ::connect(_sockfd, (struct sockaddr *)&addr, sizeof(sockaddr_in));
+	ip_ = std::string(ip);
+	port_ = port;
+	auto ret = ::connect(sockfd_, (struct sockaddr *)&addr, sizeof(sockaddr_in));
 	if (ret == 0)
 	{
 		return;
@@ -155,7 +155,7 @@ void Socket::connect(const char *ip, int port)
 	{
 		return connect(ip, port);
 	}
-	netco::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(_sockfd, EPOLLOUT);
+	netco::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(sockfd_, EPOLLOUT);
 	return connect(ip, port);
 }
 
@@ -163,25 +163,25 @@ void Socket::connect(const char *ip, int port)
 ssize_t Socket::send(const void *buf, size_t count)
 {
 	//忽略SIGPIPE信号
-	size_t sendIdx = ::send(_sockfd, buf, count, MSG_NOSIGNAL);
+	size_t sendIdx = ::send(sockfd_, buf, count, MSG_NOSIGNAL);
 	if (sendIdx >= count)
 	{
 		return count;
 	}
-	netco::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(_sockfd, EPOLLOUT);
+	netco::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(sockfd_, EPOLLOUT);
 	return send((char *)buf + sendIdx, count - sendIdx);
 }
 
 int Socket::shutdownWrite()
 {
-	int ret = ::shutdown(_sockfd, SHUT_WR);
+	int ret = ::shutdown(sockfd_, SHUT_WR);
 	return ret;
 }
 
 int Socket::setTcpNoDelay(bool on)
 {
 	int optval = on ? 1 : 0;
-	int ret = ::setsockopt(_sockfd, IPPROTO_TCP, TCP_NODELAY,
+	int ret = ::setsockopt(sockfd_, IPPROTO_TCP, TCP_NODELAY,
 						   &optval, static_cast<socklen_t>(sizeof optval));
 	return ret;
 }
@@ -189,7 +189,7 @@ int Socket::setTcpNoDelay(bool on)
 int Socket::setReuseAddr(bool on)
 {
 	int optval = on ? 1 : 0;
-	int ret = ::setsockopt(_sockfd, SOL_SOCKET, SO_REUSEADDR,
+	int ret = ::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR,
 						   &optval, static_cast<socklen_t>(sizeof optval));
 	return ret;
 }
@@ -199,7 +199,7 @@ int Socket::setReusePort(bool on)
 	int ret = -1;
 #ifdef SO_REUSEPORT
 	int optval = on ? 1 : 0;
-	ret = ::setsockopt(_sockfd, SOL_SOCKET, SO_REUSEPORT,
+	ret = ::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEPORT,
 					   &optval, static_cast<socklen_t>(sizeof optval));
 #endif
 	return ret;
@@ -208,7 +208,7 @@ int Socket::setReusePort(bool on)
 int Socket::setKeepAlive(bool on)
 {
 	int optval = on ? 1 : 0;
-	int ret = ::setsockopt(_sockfd, SOL_SOCKET, SO_KEEPALIVE,
+	int ret = ::setsockopt(sockfd_, SOL_SOCKET, SO_KEEPALIVE,
 						   &optval, static_cast<socklen_t>(sizeof optval));
 	return ret;
 }
@@ -216,15 +216,15 @@ int Socket::setKeepAlive(bool on)
 //设置socket为非阻塞的
 int Socket::setNonBolckSocket()
 {
-	auto flags = fcntl(_sockfd, F_GETFL, 0);
-	int ret = fcntl(_sockfd, F_SETFL, flags | O_NONBLOCK); //设置成非阻塞模式
+	auto flags = fcntl(sockfd_, F_GETFL, 0);
+	int ret = fcntl(sockfd_, F_SETFL, flags | O_NONBLOCK); //设置成非阻塞模式
 	return ret;
 }
 
 //设置socket为阻塞的
 int Socket::setBlockSocket()
 {
-	auto flags = fcntl(_sockfd, F_GETFL, 0);
-	int ret = fcntl(_sockfd, F_SETFL, flags & ~O_NONBLOCK); //设置成阻塞模式；
+	auto flags = fcntl(sockfd_, F_GETFL, 0);
+	int ret = fcntl(sockfd_, F_SETFL, flags & ~O_NONBLOCK); //设置成阻塞模式；
 	return ret;
 }

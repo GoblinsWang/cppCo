@@ -101,7 +101,7 @@ void Time::toLocalTime(time_t second, long timezone, struct tm *tm_time)
 struct timespec Time::timeIntervalFromNow()
 {
 	struct timespec ts;
-	int64_t microseconds = _timeVal - Time::now().getTimeVal();
+	int64_t microseconds = timeVal_ - Time::now().getTimeVal();
 	if (microseconds < 1)
 	{ //若时间间隔已经小于Time的精度ms时，即当作1us
 		ts.tv_sec = 0;

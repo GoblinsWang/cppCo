@@ -28,7 +28,7 @@ namespace netco
 	{
 	public:
 		explicit Socket(int sockfd, std::string ip = "", int port = -1)
-			: _sockfd(sockfd), _pRef(new int(1)), _port(port), _ip(std::move(ip))
+			: sockfd_(sockfd), pRef_(new int(1)), port_(port), ip_(std::move(ip))
 		{
 			if (sockfd > 0)
 			{
@@ -37,25 +37,25 @@ namespace netco
 		}
 
 		Socket()
-			: _sockfd(::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP)),
-			  _pRef(new int(1)), _port(-1), _ip("")
+			: sockfd_(::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP)),
+			  pRef_(new int(1)), port_(-1), ip_("")
 		{
 		}
 
-		Socket(const Socket &otherSock) : _sockfd(otherSock._sockfd)
+		Socket(const Socket &otherSock) : sockfd_(otherSock.sockfd_)
 		{
-			*(otherSock._pRef) += 1;
-			_pRef = otherSock._pRef;
-			_ip = otherSock._ip;
-			_port = otherSock._port;
+			*(otherSock.pRef_) += 1;
+			pRef_ = otherSock.pRef_;
+			ip_ = otherSock.ip_;
+			port_ = otherSock.port_;
 		}
 
-		Socket(Socket &&otherSock) : _sockfd(otherSock._sockfd)
+		Socket(Socket &&otherSock) : sockfd_(otherSock.sockfd_)
 		{
-			*(otherSock._pRef) += 1;
-			_pRef = otherSock._pRef;
-			_ip = std::move(otherSock._ip);
-			_port = otherSock._port;
+			*(otherSock.pRef_) += 1;
+			pRef_ = otherSock.pRef_;
+			ip_ = std::move(otherSock.ip_);
+			port_ = otherSock.port_;
 		}
 
 		Socket &operator=(const Socket &otherSock) = delete;
@@ -63,10 +63,10 @@ namespace netco
 		~Socket();
 
 		// 返回当前Socket的fd
-		int fd() const { return _sockfd; }
+		int fd() const { return sockfd_; }
 
 		// 返回当前Socket是否可用
-		bool isUseful() { return _sockfd >= 0; }
+		bool isUseful() { return sockfd_ >= 0; }
 
 		// 绑定ip和port到当前Socket
 		int bind(int port);
@@ -87,10 +87,10 @@ namespace netco
 		ssize_t send(const void *buf, size_t count);
 
 		// 获取当前套接字的目标ip
-		std::string ip() { return _ip; }
+		std::string ip() { return ip_; }
 
 		// 获取当前套接字的目标port
-		int port() { return _port; }
+		int port() { return port_; }
 
 		// 获取套接字的选项,成功则返回true，反之，返回false
 		bool getSocketOpt(struct tcp_info *) const;
@@ -129,16 +129,16 @@ namespace netco
 		Socket accept_raw();
 
 		// fd
-		const int _sockfd;
+		const int sockfd_;
 
 		// 引用计数
-		int *_pRef;
+		int *pRef_;
 
 		// 端口号
-		int _port;
+		int port_;
 
 		// ip
-		std::string _ip;
+		std::string ip_;
 	};
 
 }
