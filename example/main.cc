@@ -138,12 +138,12 @@ void mutex_test(netco::RWMutex &mu)
 				{
 					mu.rlock();
 					std::cout << i << " : start reading" << std::endl;
-					netco::co_sleep(100);
+					netco::co_sleep(50 + i);
 					std::cout << i << " : finish reading" << std::endl;
 					mu.runlock();
 					mu.wlock();
 					std::cout << i << " : start writing" << std::endl;
-					netco::co_sleep(100);
+					netco::co_sleep(50);
 					std::cout << i << " : finish writing" << std::endl;
 					mu.wunlock();
 				});
@@ -155,12 +155,12 @@ void mutex_test(netco::RWMutex &mu)
 				{
 					mu.wlock();
 					std::cout << i << " : start writing" << std::endl;
-					netco::co_sleep(100);
+					netco::co_sleep(50);
 					std::cout << i << " : finish writing" << std::endl;
 					mu.wunlock();
 					mu.rlock();
 					std::cout << i << " : start reading" << std::endl;
-					netco::co_sleep(100);
+					netco::co_sleep(50);
 					std::cout << i << " : finish reading" << std::endl;
 					mu.runlock();
 				});
@@ -169,9 +169,9 @@ void mutex_test(netco::RWMutex &mu)
 
 int main()
 {
-	// netco::RWMutex mu;
-	// mutex_test(mu);
-	single_acceptor_server_test();
+	netco::RWMutex mu;
+	mutex_test(mu);
+	// single_acceptor_server_test();
 	// multi_acceptor_server_test();
 	// client_test();
 	netco::sche_join();

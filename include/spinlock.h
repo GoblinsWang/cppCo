@@ -25,7 +25,7 @@ namespace netco
 		void lock()
 		{
 			int exp = 1;
-			while (!sem_.compare_exchange_strong(exp, 0))
+			while (!sem_.compare_exchange_strong(exp, 0)) // 当sem_的值和exp值相等时，sem_被赋值为0,返回true，所以不进入循环
 			{
 				exp = 1;
 			}
