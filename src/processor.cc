@@ -1,6 +1,6 @@
 /***
 	@author: Wangzhiming
-	@date: 2021-10-29
+	@date: 2022-10-29
 ***/
 #include "../include/processor.h"
 #include "../include/parameter.h"
@@ -65,7 +65,7 @@ void Processor::wait(Time time)
 {
 	pCurCoroutine_->yield();
 	timer_.runAfter(time, pCurCoroutine_);
-	mainCtx_.swapToMe(pCurCoroutine_->getCtx());
+	mainCtx_.swapToMe(pCurCoroutine_->getCtx()); // 切换到主线程，然后将当前协程的上下文保存到当前协程的对象里面
 }
 
 void Processor::goCo(Coroutine *pCo)
@@ -111,7 +111,7 @@ bool Processor::loop()
 			status_ = PRO_RUNNING;
 			while (PRO_RUNNING == status_)
 			{
-				//清空所有列表
+				// 清空所有列表
 				if (actCoroutines_.size())
 				{
 					actCoroutines_.clear();
@@ -120,10 +120,10 @@ bool Processor::loop()
 				{
 					timerExpiredCo_.clear();
 				}
-				//获取活跃事件
+				// 获取活跃事件
 				epoller_.getActEvServ(parameter::epollTimeOutMs, actCoroutines_);
 
-				//处理超时协程
+				// 处理超时协程
 				timer_.getExpiredCoroutines(timerExpiredCo_);
 				size_t timerCoCnt = timerExpiredCo_.size();
 				for (size_t i = 0; i < timerCoCnt; ++i)
@@ -131,7 +131,7 @@ bool Processor::loop()
 					resume(timerExpiredCo_[i]);
 				}
 
-				//执行新来的协程
+				// 执行新来的协程
 				Coroutine *pNewCo = nullptr;
 				int runningQue = runningNewQue_;
 
@@ -150,14 +150,14 @@ bool Processor::loop()
 					runningNewQue_ = !runningQue;
 				}
 
-				//执行被唤醒的协程
+				// 执行被唤醒的协程
 				size_t actCoCnt = actCoroutines_.size();
 				for (size_t i = 0; i < actCoCnt; ++i)
 				{
 					resume(actCoroutines_[i]);
 				}
 
-				//清除已经执行完毕的协程
+				// 清除已经执行完毕的协程
 				for (auto deadCo : removedCo_)
 				{
 					coSet_.erase(deadCo);

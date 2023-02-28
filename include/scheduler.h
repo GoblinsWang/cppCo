@@ -1,6 +1,6 @@
 /***
 	@author: Wangzhiming
-	@date: 2021-10-29
+	@date: 2022-10-29
 ***/
 #pragma once
 #include <vector>
@@ -23,7 +23,7 @@ namespace netco
 
 		static Scheduler *getScheduler();
 
-		// ÔÚidxºÅÏß³Ì´´½¨ĞÂĞ­³Ì
+		// åœ¨idxå·çº¿ç¨‹åˆ›å»ºæ–°åç¨‹
 		void createNewCo(std::function<void()> &&func, size_t stackSize);
 		void createNewCo(std::function<void()> &func, size_t stackSize);
 
@@ -34,13 +34,13 @@ namespace netco
 		void join();
 
 	private:
-		// ³õÊ¼»¯Scheduler£¬threadCntÎª¿ªÆô¼¸¸öÏß³Ì
+		// åˆå§‹åŒ–Schedulerï¼ŒthreadCntä¸ºå¼€å¯å‡ ä¸ªçº¿ç¨‹
 		bool startScheduler(int threadCnt);
 
-		// ÈÕÖ¾¹ÜÀíÆ÷ÊµÀı
+		// æ—¥å¿—ç®¡ç†å™¨å®ä¾‹
 		static Scheduler *pScher_;
 
-		// ÓÃÓÚ±£»¤µÄËø£¬ÎªÁË·şÎñÆ÷Ö´ĞĞĞ§ÂÊ£¬Ô­ÔòÉÏ²»ÔÊĞí³¤¾ÃÕ¼ÓĞ´ËËø
+		// ç”¨äºä¿æŠ¤çš„é”ï¼Œä¸ºäº†æœåŠ¡å™¨æ‰§è¡Œæ•ˆç‡ï¼ŒåŸåˆ™ä¸Šä¸å…è®¸é•¿ä¹…å æœ‰æ­¤é”
 		static std::mutex scherMtx_;
 
 		std::vector<Processor *> processors_;

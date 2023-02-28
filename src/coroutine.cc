@@ -1,6 +1,6 @@
 /***
 	@author: Wangzhiming
-	@date: 2021-10-29
+	@date: 2022-10-29
 ***/
 #include "../include/coroutine.h"
 #include "../include/processor.h"
@@ -41,7 +41,7 @@ void Coroutine::resume()
 		ctx_.swapToMe(pMainCtx);
 		break;
 
-	case CO_WAITING: // 之前设置过context了，这里直接swap
+	case CO_WAITING: // 这个状态是之前被挂起的，挂起的时候协程内是保存了当时的上下文信息的，不需要重新makeContext，所以可以直接swap
 		status_ = CO_RUNNING;
 		ctx_.swapToMe(pMainCtx);
 		break;

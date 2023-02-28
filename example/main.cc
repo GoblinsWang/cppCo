@@ -1,6 +1,6 @@
 /***
 	@author: Wangzhiming
-	@date: 2021-10-29
+	@date: 2022-10-29
 ***/
 #include <iostream>
 #include <sys/sysinfo.h>
@@ -56,7 +56,7 @@ void single_acceptor_server_test()
 								break;
 							}
 						}
-						netco::co_sleep(100); //需要等一下，否则还没发送完毕就关闭了
+						netco::co_sleep(100); // 需要等一下，否则还没发送完毕就关闭了
 						delete conn;
 					});
 			}
@@ -64,7 +64,7 @@ void single_acceptor_server_test()
 }
 
 // netco http response with multi acceptor test
-//每条线程一个acceptor的服务
+// 每条线程一个acceptor的服务
 void multi_acceptor_server_test()
 {
 	auto tCnt = ::get_nprocs_conf();
@@ -98,7 +98,7 @@ void multi_acceptor_server_test()
 							if (conn->read((void *)buf, 1024) > 0)
 							{
 								conn->send(hello.c_str(), hello.size());
-								netco::co_sleep(50); //需要等一下，否则还没发送完毕就关闭了
+								netco::co_sleep(50); // 需要等一下，否则还没发送完毕就关闭了
 							}
 							delete conn;
 						});
@@ -108,7 +108,7 @@ void multi_acceptor_server_test()
 	}
 }
 
-//作为客户端的测试，可配合上述server测试
+// 作为客户端的测试，可配合上述server测试
 void client_test()
 {
 	netco::co_go(
@@ -127,7 +127,7 @@ void client_test()
 		});
 }
 
-//读写锁测试
+// 读写锁测试
 void mutex_test(netco::RWMutex &mu)
 {
 	for (int i = 0; i < 10; ++i)
@@ -170,9 +170,9 @@ void mutex_test(netco::RWMutex &mu)
 int main()
 {
 	netco::RWMutex mu;
-	mutex_test(mu);
+	// mutex_test(mu);
 	// single_acceptor_server_test();
-	// multi_acceptor_server_test();
+	multi_acceptor_server_test();
 	// client_test();
 	netco::sche_join();
 	std::cout << "end" << std::endl;

@@ -1,6 +1,6 @@
 /***
 	@author: Wangzhiming
-	@date: 2021-10-29
+	@date: 2022-10-29
 ***/
 #include "../include/timer.h"
 #include "../include/coroutine.h"
@@ -65,12 +65,12 @@ void Timer::runAt(Time time, Coroutine *pCo)
 {
 	timerCoHeap_.push(std::move(std::pair<Time, Coroutine *>(time, pCo)));
 	if (timerCoHeap_.top().first == time)
-	{ //新加入的任务是最紧急的任务则需要更改timefd所设置的时间
+	{ // 新加入的任务是最紧急的任务则需要更改timefd所设置的时间
 		resetTimeOfTimefd(time);
 	}
 }
 
-//给timefd重新设置时间，time是绝对时间
+// 给timefd重新设置时间，time是绝对时间
 bool Timer::resetTimeOfTimefd(Time time)
 {
 	struct itimerspec newValue;
@@ -78,7 +78,7 @@ bool Timer::resetTimeOfTimefd(Time time)
 	memset(&newValue, 0, sizeof newValue);
 	memset(&oldValue, 0, sizeof oldValue);
 	newValue.it_value = time.timeIntervalFromNow();
-	int ret = ::timerfd_settime(timeFd_, 0, &newValue, &oldValue);
+	int ret = ::timerfd_settime(timeFd_, 0, &newValue, &oldValue); // 第二个参数为0表示相对时间，为1表示绝对时间
 	return ret < 0 ? false : true;
 }
 
