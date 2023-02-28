@@ -6,7 +6,7 @@
 #include "../include/scheduler.h"
 #include "../include/spinlock_guard.h"
 
-using namespace netco;
+using namespace cppCo;
 
 void RWMutex::rlock()
 {

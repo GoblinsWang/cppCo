@@ -6,7 +6,7 @@
 
 #include <sys/sysinfo.h>
 
-using namespace netco;
+using namespace cppCo;
 
 Scheduler *Scheduler::pScher_ = nullptr;
 std::mutex Scheduler::scherMtx_;

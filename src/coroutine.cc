@@ -6,7 +6,7 @@
 #include "../include/processor.h"
 #include "../include/parameter.h"
 
-using namespace netco;
+using namespace cppCo;
 
 static void coWrapFunc(Processor *pP)
 {

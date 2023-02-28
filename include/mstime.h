@@ -8,7 +8,7 @@
 
 struct timespec;
 
-namespace netco
+namespace cppCo
 {
 
 	// 一年中每个月的天数，非闰年

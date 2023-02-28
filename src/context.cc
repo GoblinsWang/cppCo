@@ -6,7 +6,7 @@
 #include "../include/parameter.h"
 #include <stdlib.h>
 
-using namespace netco;
+using namespace cppCo;
 
 Context::Context(size_t stackSize)
 	: pStack_(nullptr), stackSize_(stackSize)

@@ -16,7 +16,7 @@
 
 extern __thread int threadIdx; // 每个线程都会有一份
 
-namespace netco
+namespace cppCo
 {
 	enum processerStatus
 	{

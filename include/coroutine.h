@@ -7,7 +7,7 @@
 #include "context.h"
 #include "utils.h"
 
-namespace netco
+namespace cppCo
 {
 
 	enum coStatus

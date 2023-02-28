@@ -13,7 +13,7 @@
 #include <string.h>
 #include <sys/epoll.h>
 
-using namespace netco;
+using namespace cppCo;
 
 Socket::~Socket()
 {
@@ -100,7 +100,7 @@ Socket Socket::accept_raw()
 	int port = ntohs(sock->sin_port); // linux上打印方式
 	struct in_addr in = sock->sin_addr;
 	char ip[INET_ADDRSTRLEN]; // INET_ADDRSTRLEN这个宏系统默认定义 16
-	//成功的话此时IP地址保存在str字符串中。
+	// 成功的话此时IP地址保存在str字符串中。
 	inet_ntop(AF_INET, &in, ip, sizeof(ip));
 
 	return Socket(connfd, std::string(ip), port);
@@ -113,7 +113,7 @@ Socket Socket::accept()
 	{
 		return ret;
 	}
-	netco::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(sockfd_, EPOLLIN | EPOLLPRI | EPOLLRDHUP | EPOLLHUP);
+	cppCo::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(sockfd_, EPOLLIN | EPOLLPRI | EPOLLRDHUP | EPOLLHUP);
 	auto con(accept_raw());
 	if (con.isUseful())
 	{
@@ -122,7 +122,7 @@ Socket Socket::accept()
 	return accept();
 }
 
-//从socket中读数据
+// 从socket中读数据
 ssize_t Socket::read(void *buf, size_t count)
 {
 	auto ret = ::read(sockfd_, buf, count);
@@ -134,7 +134,7 @@ ssize_t Socket::read(void *buf, size_t count)
 	{
 		return read(buf, count);
 	}
-	netco::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(sockfd_, EPOLLIN | EPOLLPRI | EPOLLRDHUP | EPOLLHUP);
+	cppCo::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(sockfd_, EPOLLIN | EPOLLPRI | EPOLLRDHUP | EPOLLHUP);
 	return ::read(sockfd_, buf, count);
 }
 
@@ -155,20 +155,20 @@ void Socket::connect(const char *ip, int port)
 	{
 		return connect(ip, port);
 	}
-	netco::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(sockfd_, EPOLLOUT);
+	cppCo::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(sockfd_, EPOLLOUT);
 	return connect(ip, port);
 }
 
-//往socket中写数据
+// 往socket中写数据
 ssize_t Socket::send(const void *buf, size_t count)
 {
-	//忽略SIGPIPE信号
+	// 忽略SIGPIPE信号
 	size_t sendIdx = ::send(sockfd_, buf, count, MSG_NOSIGNAL);
 	if (sendIdx >= count)
 	{
 		return count;
 	}
-	netco::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(sockfd_, EPOLLOUT);
+	cppCo::Scheduler::getScheduler()->getProcessor(threadIdx)->waitEvent(sockfd_, EPOLLOUT);
 	return send((char *)buf + sendIdx, count - sendIdx);
 }
 
@@ -213,18 +213,18 @@ int Socket::setKeepAlive(bool on)
 	return ret;
 }
 
-//设置socket为非阻塞的
+// 设置socket为非阻塞的
 int Socket::setNonBolckSocket()
 {
 	auto flags = fcntl(sockfd_, F_GETFL, 0);
-	int ret = fcntl(sockfd_, F_SETFL, flags | O_NONBLOCK); //设置成非阻塞模式
+	int ret = fcntl(sockfd_, F_SETFL, flags | O_NONBLOCK); // 设置成非阻塞模式
 	return ret;
 }
 
-//设置socket为阻塞的
+// 设置socket为阻塞的
 int Socket::setBlockSocket()
 {
 	auto flags = fcntl(sockfd_, F_GETFL, 0);
-	int ret = fcntl(sockfd_, F_SETFL, flags & ~O_NONBLOCK); //设置成阻塞模式；
+	int ret = fcntl(sockfd_, F_SETFL, flags & ~O_NONBLOCK); // 设置成阻塞模式；
 	return ret;
 }

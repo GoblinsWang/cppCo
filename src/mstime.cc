@@ -5,7 +5,7 @@
 #include "../include/mstime.h"
 #include <sys/time.h>
 
-using namespace netco;
+using namespace cppCo;
 
 Time Time::now()
 {

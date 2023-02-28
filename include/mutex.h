@@ -9,7 +9,7 @@
 #include <atomic>
 #include <queue>
 
-namespace netco
+namespace cppCo
 {
 
     enum muStatus

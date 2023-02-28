@@ -9,7 +9,7 @@
 
 struct epoll_event;
 
-namespace netco
+namespace cppCo
 {
 	class Coroutine;
 

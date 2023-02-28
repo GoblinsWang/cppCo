@@ -11,7 +11,7 @@
 #include <string.h>
 #include <unistd.h>
 
-using namespace netco;
+using namespace cppCo;
 
 Timer::Timer()
 	: timeFd_(-1)

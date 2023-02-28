@@ -14,7 +14,7 @@
 
 #define TIMER_DUMMYBUF_SIZE 1024
 
-namespace netco
+namespace cppCo
 {
 	class Coroutine;
 	class Epoller;

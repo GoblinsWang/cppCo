@@ -6,7 +6,7 @@
 #include "parameter.h"
 #include "utils.h"
 
-namespace netco
+namespace cppCo
 {
 	struct MemBlockNode
 	{

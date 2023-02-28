@@ -6,7 +6,7 @@
 #include <type_traits>
 #include "mempool.h"
 
-namespace netco
+namespace cppCo
 {
 
 	template <class T>

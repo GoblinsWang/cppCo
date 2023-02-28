@@ -7,7 +7,7 @@
 #include "parameter.h"
 #include <ucontext.h>
 
-namespace netco
+namespace cppCo
 {
 
 	class Processor;

@@ -5,7 +5,7 @@
 #pragma once
 #include <stddef.h>
 
-namespace netco
+namespace cppCo
 {
 	namespace parameter
 	{

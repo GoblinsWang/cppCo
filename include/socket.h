@@ -15,7 +15,7 @@
 
 struct tcp_info;
 
-namespace netco
+namespace cppCo
 {
 	/*
 		Socket类，创建的Socket对象默认都是非阻塞的

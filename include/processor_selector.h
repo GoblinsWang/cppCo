@@ -5,7 +5,7 @@
 #pragma once
 #include <vector>
 
-namespace netco
+namespace cppCo
 {
 	class Processor;
 

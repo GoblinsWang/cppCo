@@ -9,7 +9,7 @@
 #include "processor.h"
 #include "processor_selector.h"
 
-namespace netco
+namespace cppCo
 {
 
 	class Scheduler
